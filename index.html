@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="弹幕桥 · B站到YouTube 隐私政策 / Danmaku Bridge Privacy Policy">
+  <title>弹幕桥 · 隐私政策 / Privacy Policy</title>
+  <style>
+    :root{color-scheme:light;--ink:#182838;--muted:#526273;--line:#dce5eb;--accent:#126b62}
+    *{box-sizing:border-box}body{margin:0;background:#f5f8fa;color:var(--ink);font:16px/1.85 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+    main{max-width:880px;margin:48px auto;padding:44px;background:#fff;border:1px solid var(--line);border-radius:16px}header{border-bottom:1px solid var(--line);padding-bottom:24px}
+    .brand{color:var(--accent);font-weight:700;letter-spacing:.04em}h1{font-size:32px;line-height:1.3;margin:12px 0}h2{font-size:21px;line-height:1.5;margin:30px 0 10px}p{margin:10px 0}.meta,footer{color:var(--muted);font-size:14px}
+    .summary{background:#eff8f5;border-left:4px solid var(--accent);padding:16px 20px;margin:24px 0}li{margin:7px 0}a{color:var(--accent)}nav{margin-top:14px}section[lang=en]{border-top:1px solid var(--line);margin-top:40px;padding-top:18px}footer{border-top:1px solid var(--line);margin-top:32px;padding-top:18px}
+    @media(max-width:600px){main{margin:0;border:0;border-radius:0;padding:28px 20px}h1{font-size:27px}}
+  </style>
+</head>
+<body><main>
+  <header><div class="brand">弹幕桥 · B站到YouTube</div><h1>隐私政策 / Privacy Policy</h1>
+    <p class="meta">生效及更新日期：2026年11月1日 · 适用于扩展 v0.1.3</p>
+    <nav><a href="#zh">中文</a> · <a href="#en" lang="en">English</a></nav>
+  </header>
+  <section id="zh" aria-label="中文隐私政策">
+    <div class="summary">本扩展在你的浏览器内转发弹幕，不向开发者运营的服务器上传弹幕或昵称。为显示表情，扩展会向 B 站图片 CDN 请求图片。</div>
+    <h2>1. 功能与适用范围</h2>
+    <p>弹幕桥将已打开的 B 站直播间新聊天消息，显示为用户选择的 YouTube 播放器上的滚动弹幕，并支持显示设置与已识别的表情替换。它是独立的非官方扩展，与 Bilibili、YouTube、Google 或 Microsoft 无隶属或背书关系。本政策说明扩展自身的数据处理行为。</p>
+    <h2>2. 在本机访问和处理的信息</h2>
+    <ul>
+      <li><strong>直播聊天：</strong>读取已打开的 B 站直播页面中新增的弹幕文字和发送者昵称，临时转发到绑定的 YouTube 页面。昵称是否显示由用户设置决定；关闭昵称显示不会停止源页面的昵称读取。</li>
+      <li><strong>相关标签页：</strong>使用匹配的 B 站直播及 YouTube 标签页的标题、网址和标签页标识，以供用户选择页面、校验房间和建立绑定。不收集完整浏览历史。</li>
+      <li><strong>表情资源：</strong>读取页面上可识别的表情标记与图片地址，并下载对应图片用于显示。</li>
+      <li><strong>使用设置与状态：</strong>处理字号、透明度、速度、显示区域、昵称显示、开关、绑定信息以及临时采集状态。</li>
+    </ul>
+    <h2>3. 存储与保留</h2>
+    <ul>
+      <li>显示设置和表情标记到图片地址的映射保存在浏览器的扩展本地存储中，供后续使用。</li>
+      <li>标签页绑定、直播间号、采集计数和更新时间保存在扩展会话存储中；浏览器重新启动或扩展会话结束时清除。关闭标签页也会移除该标签页对应的绑定记录。</li>
+      <li>聊天文字、昵称、待显示队列及下载的表情图片仅在运行内存中临时处理，不写入持久聊天历史。图片缓存可能在扩展后台停止运行后释放。</li>
+    </ul>
+    <h2>4. 网络请求与第三方</h2>
+    <p>本版本不向开发者运营的服务器传输弹幕、昵称、标签页信息、设置或分析事件，也不包含广告或统计跟踪 SDK。</p>
+    <p>表情功能会向 <code>https://*.hdslb.com/</code> 下的 B 站图片 CDN 请求图片。这些请求不携带账号凭据或来源页面信息，扩展不会将弹幕正文和昵称作为请求内容发送给 CDN。图片服务器仍会接收到正常网络请求附带的 IP 地址及其他连接信息；这些信息由第三方按其政策处理。</p>
+    <p>你正常访问 B 站、YouTube 或本隐私政策托管页面时，相应平台会按其自身政策处理访问数据。本扩展不控制这些平台。此政策页面没有自行添加分析脚本、表单或跟踪器。</p>
+    <h2>5. 使用目的与共享</h2>
+    <p>扩展仅为弹幕转发、显示、表情替换及必要设置处理上述信息。不出售用户数据，不用于广告画像、与核心功能无关的用途、信用评估或贷款决策。弹幕转发发生在同一浏览器内的已绑定页面之间，不会由本扩展发布到 YouTube 聊天区或发送给其他扩展用户。</p>
+    <h2>6. 权限说明</h2>
+    <ul>
+      <li><code>storage</code>：保存显示设置、表情映射、会话绑定与状态。</li>
+      <li><code>https://live.bilibili.com/*</code>：访问直播聊天及表情相关页面内容。</li>
+      <li><code>https://www.youtube.com/*</code>：识别目标页面并显示播放器弹幕层。</li>
+      <li><code>https://*.hdslb.com/*</code>：下载已识别的表情图片。</li>
+    </ul>
+    <h2>7. 控制和删除</h2>
+    <p>关闭弹幕开关可以停止显示，但源页面脚本在扩展启用期间仍可能观察聊天并更新临时状态和表情映射。要停止扩展访问页面，请在浏览器中禁用扩展、撤销对应网站权限或关闭相关页面。卸载扩展可移除其浏览器本地存储；重新安装前也可通过浏览器提供的扩展数据管理功能清除数据（如支持）。</p>
+    <h2>8. 更新与联系</h2>
+    <p>扩展数据处理方式变化时，本政策将相应更新并修改日期。有关本扩展或隐私的问题，请通过扩展商店详情页列出的开发者联系邮箱或支持入口联系发布者。</p>
+  </section>
+  <section id="en" lang="en" aria-label="English privacy policy">
+    <h2>Privacy Policy — English</h2>
+    <p class="meta">Effective and updated: November 1, 2026 · Extension version: 0.1.3</p>
+    <h2>1. Purpose</h2>
+    <p>Danmaku Bridge displays new messages from an open Bilibili live-room tab as scrolling comments over a YouTube player selected by the user. It supports appearance settings and recognized emoji images. This independent, unofficial extension is not affiliated with or endorsed by Bilibili, YouTube, Google or Microsoft.</p>
+    <h2>2. Information processed locally</h2>
+    <p>The extension reads new chat text and sender nicknames from open Bilibili live-room pages, matching Bilibili and YouTube tab titles, URLs and identifiers for selection and binding, emoji labels and image URLs, display preferences and temporary collection status. Nicknames are read even when their display is disabled. The extension does not collect a complete browsing history.</p>
+    <h2>3. Storage and retention</h2>
+    <p>Display preferences and emoji-label-to-image-URL mappings are saved in extension local storage. Tab bindings, room identifiers, counters and update times are kept in session storage, which is cleared when the browser restarts or the extension session ends. Closing a tab removes its corresponding binding record. Chat text, nicknames, rendering queues and downloaded image caches are held temporarily in runtime memory, not stored as persistent chat history.</p>
+    <h2>4. Network requests</h2>
+    <p>This version does not send chat messages, nicknames, tab information, settings or analytics events to a developer-operated server. It includes no advertising or analytics SDKs.</p>
+    <p>Emoji images are requested from Bilibili's image CDN at <code>https://*.hdslb.com/</code>. These requests omit account credentials and referrer information. The extension does not send chat text or nicknames as request content. The CDN still receives the IP address and connection information inherent in network requests and handles that information under its own policies.</p>
+    <p>Bilibili, YouTube and the provider hosting this policy page independently process normal website visits under their own policies. This policy page contains no added analytics scripts, forms or trackers.</p>
+    <h2>5. Use and disclosure</h2>
+    <p>Information is used only for local chat relay, display, emoji rendering and necessary settings. The extension does not sell user data or use it for advertising profiles, unrelated purposes, creditworthiness or lending decisions. Relayed comments stay within bound pages in the same browser; the extension does not post them to YouTube chat or distribute them to other extension users.</p>
+    <h2>6. Permissions</h2>
+    <p>Storage access saves preferences, emoji mappings and session state. Bilibili live-page access reads chat and emoji content. YouTube access identifies target pages and renders the overlay. Access to the hdslb.com image CDN downloads recognized emoji images.</p>
+    <h2>7. Control and deletion</h2>
+    <p>Turning the overlay off stops display, but source-page scripts may continue observing chat and updating temporary status and emoji mappings while the extension remains enabled. Disable the extension, revoke its site access or close relevant pages to stop page access. Uninstall the extension to remove its browser local storage, or use browser-provided extension data controls where available.</p>
+    <h2>8. Updates and contact</h2>
+    <p>This policy will be updated when data practices change. For extension or privacy questions, contact the publisher through the developer email or support channel listed on the extension's store page.</p>
+  </section>
+  <footer>弹幕桥 · B站到YouTube / Danmaku Bridge</footer>
+</main></body></html>
