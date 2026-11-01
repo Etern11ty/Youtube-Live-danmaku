@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "弹幕桥 · B站到YouTube",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "将已打开的B站直播间文字弹幕显示在YouTube播放器上。",
   "permissions": [
     "storage"
