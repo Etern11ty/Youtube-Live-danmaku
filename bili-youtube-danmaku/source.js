@@ -1,4 +1,5 @@
 (() => {
+  const life=new DanmakuLifecycle();
   const selector = '.chat-item.danmaku-item, .danmaku-item[data-danmaku], .chat-item[data-danmaku]';
   const seen = new WeakSet();
   let pending = [], count = 0;
@@ -9,14 +10,19 @@
   const normalizeText=text=>String(text || '').normalize('NFC').replace(/[\u200b-\u200d\ufeff]/g,'').replace(/\s+/g,' ').trim();
   const normalizeUser=user=>normalizeText(user).replace(/[:：]\s*$/,'');
   const matches=(m,item)=>Date.now()-m.at<8000 && (normalizeText(m.text)===normalizeText(item.text) || '['+normalizeText(m.text)+']'===normalizeText(item.text)) && (!m.user || !item.user || normalizeUser(m.user)===normalizeUser(item.user));
-  if(typeof window!=='undefined')window.addEventListener('message',event=>{
+  const onMetadata=event=>{
+    if(life.stopped)return;
     const m=event.data;
     if(event.source!==window || event.origin!==location.origin || m?.channel!=='danmaku-bridge-meta-v1' || typeof m.text!=='string')return;
     const color=DanmakuEmoji.color(m.color);
     if(!color)return;
     metadata.push({text:m.text.trim().slice(0,200),user:String(m.user || '').trim().slice(0,40),color,emojis:DanmakuEmoji.cleanMap(m.emojis),emojiScales:DanmakuEmoji.cleanScales(m.emojiScales),at:Date.now()});
     while(metadata.length>400 || metadata.length && Date.now()-metadata[0].at>8000)metadata.shift();
-  });
+  };
+  if(typeof window!=='undefined'){
+    window.addEventListener('message',onMetadata);
+    life.onStop(()=>window.removeEventListener('message',onMetadata));
+  }
   function scanScreenColors(){
     if(typeof getComputedStyle!=='function')return;
     const floating='.bili-danmaku-x-dm, .b-danmaku, .bilibili-live-player-video-danmaku-item, .danmaku-item[style*="color"]';
@@ -28,7 +34,7 @@
     for(const [text,v] of screenColors)if(Date.now()-v.at>5000)screenColors.delete(text);
     while(screenColors.size>400)screenColors.delete(screenColors.keys().next().value);
   }
-  chrome.storage.local.get('emojiScales').then(x=>{scales={...DanmakuEmoji.cleanScales(x.emojiScales),...scales};}).catch(()=>{});
+  life.call(()=>chrome.storage.local.get('emojiScales')).then(x=>{scales={...DanmakuEmoji.cleanScales(x.emojiScales),...scales};});
   function special(img,body){
     const marker=img.closest('[data-emoticon-unique], [data-emoticon-type], [data-emoji-type]');
     const unique=marker?.getAttribute('data-emoticon-unique') || '';
@@ -45,7 +51,7 @@
   function rememberScale(code,img,body){
     if(DanmakuEmoji.validCode(code) && special(img,body) && scales[code]!==1.8){scales[code]=1.8;dirty=true;}
   }
-  chrome.storage.local.get('emojiCatalog').then(x=>{catalog={...DanmakuEmoji.cleanMap(x.emojiCatalog),...catalog};}).catch(()=>{});
+  life.call(()=>chrome.storage.local.get('emojiCatalog')).then(x=>{catalog={...DanmakuEmoji.cleanMap(x.emojiCatalog),...catalog};});
   function learn(root){
     for(const img of root.querySelectorAll('img[alt], img[title], img[data-emoji]')){
       const raw=(img.getAttribute('data-emoji') || img.getAttribute('alt') || img.getAttribute('title') || img.parentElement?.closest('[title]')?.getAttribute('title') || '').trim();
@@ -69,10 +75,11 @@
     }
     return walk(body);
   }
-  const send = m => chrome.runtime.sendMessage(m).catch(()=>{});
+  const send = m => life.call(()=>chrome.runtime.sendMessage(m));
   // Mark existing history before observing: only new messages are forwarded.
   document.querySelectorAll(selector).forEach(n=>seen.add(n));
   function collect(n) {
+    if(life.stopped)return;
     if (seen.has(n)) return;
     const body = n.querySelector('.danmaku-content, .danmaku-item-content');
     learn(n);
@@ -98,7 +105,7 @@
     if (pending.length > 120) pending.shift();
     count++;
   }
-  new MutationObserver(records=>{
+  const observer=new MutationObserver(records=>{
     scanNeeded=true;
     for (const r of records) for (const n of r.addedNodes) {
       if (n.nodeType !== 1) {const parent=n.parentElement?.closest(selector);if(parent)collect(parent);continue;}
@@ -106,8 +113,10 @@
       n.querySelectorAll(selector).forEach(collect);
       const parent = n.closest(selector); if (parent) collect(parent);
     }
-  }).observe(document.documentElement,{childList:true,subtree:true});
-  setInterval(()=>{
+  });
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+  life.onStop(()=>{observer.disconnect();pending=[];metadata.length=0;screenColors.clear();});
+  life.every(()=>{
     if (pending.length) {
       scanScreenColors();
       // Chat DOM and decoded message events can arrive in either order.
@@ -140,10 +149,10 @@
     }
   },150);
   learn(document);
-  setInterval(()=>{
+  life.every(()=>{
     if(scanNeeded){learn(document);scanNeeded=false;}
-    if(dirty){catalog=DanmakuEmoji.cleanMap(catalog);scales=DanmakuEmoji.cleanScales(scales);chrome.storage.local.set({emojiCatalog:catalog,emojiScales:scales}).catch(()=>{});dirty=false;}
+    if(dirty){catalog=DanmakuEmoji.cleanMap(catalog);scales=DanmakuEmoji.cleanScales(scales);life.call(()=>chrome.storage.local.set({emojiCatalog:catalog,emojiScales:scales}));dirty=false;}
   },1000);
   const status = ()=>send({type:'status',count,ready:!!document.querySelector('#chat-items, .chat-history-list, .chat-history-panel, '+selector)});
-  status(); setInterval(status,5000);
+  status(); life.every(status,5000);
 })();

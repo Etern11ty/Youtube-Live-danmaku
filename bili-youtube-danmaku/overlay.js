@@ -1,4 +1,5 @@
 (() => {
+  const life=new DanmakuLifecycle();
   const defaults = {enabled:true,fontSize:28,opacity:85,duration:9,area:60,showUser:false,useColor:true};
   let settings = {...defaults}, host, root, layer, queue=[], lastUrl=location.href;
   const layout=new DanmakuLayout();
@@ -39,7 +40,7 @@
     }
   }
   const clamp=(v,min,max)=>Math.min(max,Math.max(min,Number(v)||min));
-  chrome.storage.local.get('settings').then(x=>settings={...defaults,...x.settings});
+  life.call(()=>chrome.storage.local.get('settings')).then(x=>settings={...defaults,...x.settings});
   chrome.storage.onChanged.addListener((changes,area)=>{
     if(area==='local' && changes.settings) {
       const wasEnabled=settings.enabled;
@@ -49,6 +50,7 @@
     if(area==='session' && Object.keys(changes).some(k=>k.startsWith('binding:'))) clear();
   });
   function clear(){queue=[]; layout.clear(); layer?.replaceChildren();}
+  life.onStop(()=>{clear();host?.remove();emojiAssets.clear();});
   function mount(){
     if(lastUrl!==location.href){clear();lastUrl=location.href;}
     const player=document.querySelector('#movie_player');
@@ -73,7 +75,7 @@
     }
     reply({ok:true});
   });
-  setInterval(()=>{
+  life.every(()=>{
     if(!mount() || !settings.enabled || document.hidden){queue=[];return;}
     const size=clamp(settings.fontSize,16,48), duration=clamp(settings.duration,5,20)*1000;
     const now=performance.now();
