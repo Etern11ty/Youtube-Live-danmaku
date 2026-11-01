@@ -45,7 +45,7 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
       const {settings} = await chrome.storage.local.get('settings');
       if (settings?.enabled === false) return {ok:true};
       const room = new URL(source).pathname.split('/')[1];
-      const items = Array.isArray(m.items) ? m.items.slice(0,30).map(x=>({text:String(x.text || '').trim().slice(0,200),user:String(x.user || '').slice(0,40),emojis:DanmakuEmoji.cleanMap(x.emojis)})).filter(x=>x.text) : [];
+      const items = Array.isArray(m.items) ? m.items.slice(0,30).map(x=>({text:String(x.text || '').trim().slice(0,200),user:String(x.user || '').slice(0,40),color:DanmakuEmoji.color(x.color) || '#ffffff',emojis:DanmakuEmoji.cleanMap(x.emojis),emojiScales:DanmakuEmoji.cleanScales(x.emojiScales)})).filter(x=>x.text) : [];
       await Promise.all(Object.entries(all).filter(([k,v])=>k.startsWith('binding:') && v.sourceId===sender.tab.id && v.room===room).map(([k])=>chrome.tabs.sendMessage(Number(k.slice(8)), {type:'render',items}).catch(()=>{})));
       return {ok:true};
     }

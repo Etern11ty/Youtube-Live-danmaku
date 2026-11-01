@@ -1,5 +1,5 @@
 (() => {
-  const defaults = {enabled:true,fontSize:28,opacity:85,duration:9,area:60,showUser:false};
+  const defaults = {enabled:true,fontSize:28,opacity:85,duration:9,area:60,showUser:false,useColor:true};
   let settings = {...defaults}, host, root, layer, queue=[], lastUrl=location.href;
   const layout=new DanmakuLayout();
   const emojiAssets=new Map();
@@ -22,7 +22,9 @@
     for(const part of parts){
       if(!part.url){el.append(document.createTextNode(part.text));continue;}
       const box=document.createElement('span');
-      box.style.cssText='display:inline-block;width:1.15em;height:1.15em;vertical-align:-0.18em;position:relative;overflow:hidden;';
+      const scale=item.emojiScales?.[part.text]>=1.7?1.8:1;
+      const em=Number((1.15*scale).toFixed(3));
+      box.style.cssText=`display:inline-block;width:${em}em;height:${em}em;vertical-align:middle;position:relative;overflow:hidden;`;
       const fallback=document.createElement('span');fallback.textContent=part.text;
       fallback.style.cssText='position:absolute;inset:0;font-size:.38em;display:flex;align-items:center;justify-content:center;';
       box.append(fallback);el.append(box);
@@ -81,7 +83,7 @@
     if(!queue[0].ready && now-queue[0].received<1200)return;
       const item=queue[0], el=document.createElement('div');el.className='msg';
       fillMessage(el,item);
-      el.style.cssText=`visibility:hidden;font-size:${size}px;opacity:${clamp(settings.opacity,20,100)/100};`;
+      el.style.cssText=`visibility:hidden;font-size:${size}px;opacity:${clamp(settings.opacity,20,100)/100};color:${settings.useColor!==false ? (DanmakuEmoji.color(item.color) || '#ffffff') : '#ffffff'};`;
       layer.append(el);const rect=el.getBoundingClientRect(), width=rect.width;
       const slot=layout.place({now,width:host.clientWidth,height:host.clientHeight*clamp(settings.area,20,100)/100,messageWidth:width,messageHeight:rect.height,duration});
       if(!slot){el.remove();return;}
