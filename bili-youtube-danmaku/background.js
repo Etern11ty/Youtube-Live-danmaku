@@ -1,4 +1,45 @@
 importScripts('emoji.js');
+importScripts('direct.js');
+const directConnections=new Map();
+function stopDirect(target){
+  const job=directConnections.get(target);if(!job)return;
+  directConnections.delete(target);clearTimeout(job.timer);job.connection?.stop();job.items.length=0;
+}
+function startDirect(target,binding){
+  const existing=directConnections.get(target);if(existing?.room===binding.room)return;
+  stopDirect(target);
+  const job={room:binding.room,items:[],timer:null,connection:null};directConnections.set(target,job);
+  const active=()=>directConnections.get(target)===job;
+  job.connection=new DanmakuDirect.Connection(binding.room,{
+    status:s=>{if(active())chrome.storage.session.set({['direct-status:'+target]:s}).catch(()=>{});},
+    message:item=>{
+      if(!active())return;job.items.push(item);if(job.items.length>200)job.items.shift();
+      if(!job.timer)job.timer=setTimeout(async()=>{
+        job.timer=null;const items=job.items.splice(0,200);
+        if(!active())return;
+        const data=await chrome.storage.local.get(['settings','emojiCatalog','emojiScales']);
+        if(!active() || data.settings?.enabled===false)return;
+        const catalog=DanmakuEmoji.cleanMap(data.emojiCatalog),scales=DanmakuEmoji.cleanScales(data.emojiScales);
+        for(const x of items){for(const p of DanmakuEmoji.parts(x.text,catalog))if(p.url && !x.emojis[p.text]){x.emojis[p.text]=p.url;if(scales[p.text])x.emojiScales[p.text]=scales[p.text];}}
+        // Yield bounded batches without tying delivery to image downloads.
+        for(let i=0;i<items.length && active();i+=30)await chrome.tabs.sendMessage(target,{type:'render',items:items.slice(i,i+30)}).catch(()=>{});
+      },50);
+    }
+  });
+}
+async function restoreDirect(){
+  const all=await chrome.storage.session.get(null);
+  for(const [key,b] of Object.entries(all))if(key.startsWith('binding:') && b.mode==='direct'){
+    const target=Number(key.slice(8)),tab=await chrome.tabs.get(target).catch(()=>null);
+    const current=(await chrome.storage.session.get(key))[key];
+    if(current?.mode!=='direct' || current.room!==b.room)continue;
+    if(tab?.url?.startsWith('https://www.youtube.com/'))startDirect(target,current);
+    else{stopDirect(target);await chrome.storage.session.remove([key,'direct-status:'+target]);}
+  }
+}
+const directReady=restoreDirect().catch(()=>{});
+chrome.alarms?.create('direct-recovery',{periodInMinutes:1});
+chrome.alarms?.onAlarm.addListener(alarm=>{if(alarm.name==='direct-recovery')restoreDirect().catch(()=>{});});
 const imageJobs=new Map();
 let imageDownloads=0;
 const imageWaiters=[];
@@ -53,11 +94,24 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
       if (sender.tab || !Number.isInteger(m.target) || !Number.isInteger(m.source)) throw Error('无效绑定');
       const [target, origin] = await Promise.all([chrome.tabs.get(m.target), chrome.tabs.get(m.source)]);
       if (!target.url?.startsWith('https://www.youtube.com/') || !/^https:\/\/live\.bilibili\.com\/\d+/.test(origin.url || '')) throw Error('请选择有效页面');
-      await chrome.storage.session.set({['binding:'+target.id]: {sourceId:origin.id, room:new URL(origin.url).pathname.split('/')[1]}});
+      await directReady;stopDirect(target.id);
+      await chrome.storage.session.remove('direct-status:'+target.id);
+      await chrome.storage.session.set({['binding:'+target.id]: {mode:'tab',sourceId:origin.id, room:new URL(origin.url).pathname.split('/')[1]}});
       return {ok:true};
     }
+    if(m.type==='bind-direct' && !sender.tab){
+      if(!Number.isInteger(m.target))throw Error('请选择 YouTube 页面。');
+      const target=await chrome.tabs.get(m.target);
+      if(!target.url?.startsWith('https://www.youtube.com/'))throw Error('请选择有效的 YouTube 页面。');
+      const room=DanmakuDirect.roomInput(m.room);await directReady;stopDirect(m.target);
+      const binding={mode:'direct',room};
+      await chrome.storage.session.remove('direct-status:'+m.target);
+      await chrome.storage.session.set({['binding:'+m.target]:binding});
+      startDirect(m.target,binding);return {ok:true};
+    }
     if (m.type === 'unbind' && !sender.tab) {
-      await chrome.storage.session.remove('binding:'+m.target); return {ok:true};
+      await directReady;stopDirect(m.target);
+      await chrome.storage.session.remove('binding:'+m.target);await chrome.storage.session.remove('direct-status:'+m.target);return {ok:true};
     }
     if (m.type === 'status' && isLiveSource) {
       await chrome.storage.session.set({['status:'+sender.tab.id+':frame:'+(sender.frameId || 0)]: {at:Date.now(),count:Number(m.count)||0,ready:!!m.ready,frameId:sender.frameId || 0,room:frameRoom(frameUrl),lastMessageAt:Number(m.lastMessageAt)||0}});
@@ -94,9 +148,15 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
   return true;
 });
 chrome.tabs.onRemoved.addListener(async id=>{
+  await directReady;stopDirect(id);await chrome.storage.session.remove('direct-status:'+id);
   recentMessages.delete(id);
   await chrome.storage.session.remove('binding:'+id);
   await chrome.storage.session.remove('status:'+id);
   const all=await chrome.storage.session.get(null);
   await Promise.all(Object.keys(all).filter(k=>k.startsWith('status:'+id+':frame:')).map(k=>chrome.storage.session.remove(k)));
+});
+chrome.tabs.onUpdated?.addListener((id,change)=>{
+  if(change.url && !change.url.startsWith('https://www.youtube.com/')){
+    stopDirect(id);chrome.storage.session.remove(['binding:'+id,'direct-status:'+id]).catch(()=>{});
+  }
 });

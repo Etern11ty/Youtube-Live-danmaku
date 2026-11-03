@@ -1,8 +1,10 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-const elements=Object.fromEntries(['bind','unbind','status','source','target'].map(id=>[id,{value:id==='target'?'1':'2',setAttribute(){}}]));
+const elements=Object.fromEntries(['bind','unbind','status','source','target','mode','room','roomRow','sourceRow'].map(id=>[id,{value:id==='target'?'1':'2',setAttribute(){}}]));
+elements.mode.value='tab';
 let bound=true,room='https://live.bilibili.com/123';
+let binding={sourceId:2,room:'123'};
 const records={};
-const ctx=vm.createContext({document:{getElementById:id=>elements[id]},chrome:{storage:{session:{get:async key=>key===null?records:key==='binding:1' && bound?{[key]:{sourceId:2,room:'123'}}:{}}},tabs:{get:async()=>({url:room})}},URL});
+const ctx=vm.createContext({document:{getElementById:id=>elements[id]},chrome:{storage:{session:{get:async key=>key===null?records:key==='binding:1' && bound?{[key]:binding}:{[key]:records[key]}}},tabs:{get:async()=>({url:room})}},URL});
 vm.runInContext(fs.readFileSync(require('node:path').resolve(__dirname,'../bili-youtube-danmaku/popup.js'),'utf8').replace('init().catch(showError);',''),ctx);
 (async()=>{
  await vm.runInContext('status()',ctx);assert.equal(elements.bind.textContent,'连接成功');assert.equal(elements.bind.disabled,true);assert.equal(elements.unbind.disabled,false);
@@ -13,5 +15,12 @@ vm.runInContext(fs.readFileSync(require('node:path').resolve(__dirname,'../bili-
  await vm.runInContext('status(true)',ctx);assert.equal(elements.source.value,'2');
  bound=false;await vm.runInContext('status()',ctx);assert.equal(elements.bind.textContent,'连接直播间');assert.equal(elements.unbind.disabled,true);
  bound=true;room='https://live.bilibili.com/999';await vm.runInContext('status()',ctx);assert.equal(elements.bind.disabled,false);
+ binding={mode:'direct',room:'456'};elements.mode.value='direct';elements.room.value='https://live.bilibili.com/456';
+ records['direct-status:1']={state:'connected',count:42,room:'456',at:Date.now()};
+ await vm.runInContext('status()',ctx);assert.equal(elements.bind.textContent,'连接成功');assert.equal(elements.bind.disabled,true);assert.match(elements.status.textContent,/42 条新弹幕/);
+ records['direct-status:1'].state='reconnecting';await vm.runInContext('status()',ctx);assert.equal(elements.bind.textContent,'重新连接');assert.equal(elements.bind.disabled,false);assert.equal(elements.unbind.disabled,false);
+ elements.room.value='789';await vm.runInContext('status()',ctx);assert.equal(elements.bind.textContent,'连接直播间');assert.match(elements.status.textContent,/切换来源/);
+ await vm.runInContext('status(true)',ctx);assert.equal(elements.room.value,'456');assert.equal(elements.roomRow.hidden,false);assert.equal(elements.sourceRow.hidden,true);
  console.log('PASS: connected button, room change, target selection and disconnection state');
+ console.log('PASS: direct connection state, reconnect action, pending source edit and mode restoration');
 })().catch(e=>{console.error(e);process.exitCode=1});

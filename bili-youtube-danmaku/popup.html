@@ -1,9 +1,11 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><title>弹幕桥·bilibili直播弹幕转接youtube</title><link rel="stylesheet" href="popup.css"></head>
-<body><header><span>弹幕桥·bilibili直播弹幕转接youtube</span><small>B站 → YouTube · 0.1.14</small></header>
-<p class="hint">保留 B 站直播间标签页，连接后即可显示弹幕。</p>
+<body><header><span>弹幕桥·bilibili直播弹幕转接youtube</span><small>B站 → YouTube · 0.1.15</small></header>
+<p class="hint">后台直连无需打开 B 站页面，也可保留标签页作为弹幕来源。</p>
 <label>YouTube 页面<select id="target"></select></label>
-<label>B 站直播间<select id="source"></select></label>
+<label>连接方式<select id="mode"><option value="direct">后台直连</option><option value="tab">绑定标签页</option></select></label>
+<label id="roomRow">房间号或直播间链接<input id="room" type="text" placeholder="房间号 / https://live.bilibili.com/房间号" autocomplete="off" spellcheck="false"></label>
+<label id="sourceRow" hidden>B 站直播间<select id="source"></select></label>
 <div class="buttons"><button id="bind">连接直播间</button><button id="unbind" class="secondary">断开</button></div>
 <div id="status" role="status">正在读取…</div>
 <label class="toggle"><span>显示弹幕</span><input id="enabled" type="checkbox"></label>
@@ -13,5 +15,5 @@
 <label class="range-row"><span>滚动时长</span><input id="duration" type="range" min="5" max="20"><output id="durationValue"></output></label>
 <label class="range-row"><span>显示区域</span><input id="area" type="range" min="20" max="100"><output id="areaValue"></output></label>
 <label class="toggle"><span>显示发送者昵称</span><input id="showUser" type="checkbox"></label>
-<button id="demo" class="secondary wide">发送测试弹幕</button><p class="hint">弹幕仅在本机转发；表情图片从 B 站图片 CDN 下载。B 站聊天区域须正常加载；可将直播静音。</p>
+<button id="demo" class="secondary wide">发送测试弹幕</button><p class="hint">赛事直连请填写所选主播的实际房间号。直连失败可切换为绑定标签页，并保持 B 站聊天区正常加载。弹幕仅在本机转发。</p>
 <script src="popup.js"></script></body></html>

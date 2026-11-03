@@ -16,27 +16,28 @@
 </head>
 <body><main>
   <header><div class="brand">弹幕桥·bilibili直播弹幕转接youtube</div><h1>隐私政策 / Privacy Policy</h1>
-    <p class="meta">生效及更新日期：2026年11月3日 · 适用于扩展 v0.1.14</p>
+    <p class="meta">生效及更新日期：2026年11月3日 · 适用于扩展 v0.1.15</p>
     <nav><a href="#zh">中文</a> · <a href="#en" lang="en">English</a></nav>
   </header>
   <section id="zh" aria-label="中文隐私政策">
     <div class="summary">本扩展在你的浏览器内转发弹幕，不向开发者运营的服务器上传弹幕或昵称。为显示表情，扩展会向 B 站图片 CDN 请求图片。</div>
     <h2>1. 功能与适用范围</h2>
-    <p>弹幕桥将已打开的 B 站直播间新聊天消息，显示为用户选择的 YouTube 播放器上的滚动弹幕，并支持显示设置与已识别的表情替换。它是独立的非官方扩展，与 Bilibili、YouTube、Google 或 Microsoft 无隶属或背书关系。本政策说明扩展自身的数据处理行为。</p>
+    <p>弹幕桥从用户输入的 B 站房间号、直播间链接或已打开的 B 站标签页接收新聊天消息，显示为用户选择的 YouTube 播放器上的滚动弹幕，并支持显示设置与已识别的表情替换。它是独立的非官方扩展，与 Bilibili、YouTube、Google 或 Microsoft 无隶属或背书关系。本政策说明扩展自身的数据处理行为。</p>
     <h2>2. 在本机访问和处理的信息</h2>
     <ul>
-      <li><strong>直播聊天：</strong>读取已打开的 B 站直播页面中新增的弹幕文字和发送者昵称，临时转发到绑定的 YouTube 页面。昵称是否显示由用户设置决定；关闭昵称显示不会停止源页面的昵称读取。</li>
+      <li><strong>直播聊天：</strong>通过后台直连或已打开的 B 站直播页面读取新增的弹幕文字和发送者昵称，临时转发到绑定的 YouTube 页面。昵称是否显示由用户设置决定；关闭昵称显示不会停止源页面的昵称读取。</li>
       <li><strong>相关标签页：</strong>使用匹配的 B 站直播及 YouTube 标签页的标题、网址和标签页标识，以供用户选择页面、校验房间和建立绑定。不收集完整浏览历史。</li>
       <li><strong>表情资源：</strong>读取页面上可识别的表情标记与图片地址，并下载对应图片用于显示。</li>
       <li><strong>使用设置与状态：</strong>处理字号、透明度、速度、显示区域、昵称显示、开关、绑定信息以及临时采集状态。</li>
     </ul>
     <h2>3. 存储与保留</h2>
     <ul>
-      <li>显示设置和表情标记到图片地址的映射保存在浏览器的扩展本地存储中，供后续使用。</li>
+      <li>显示设置、连接方式、上次输入的房间号或链接，以及表情标记到图片地址的映射保存在浏览器的扩展本地存储中，供后续使用。</li>
       <li>标签页绑定、直播间号、采集计数和更新时间保存在扩展会话存储中；浏览器重新启动或扩展会话结束时清除。关闭标签页也会移除该标签页对应的绑定记录。</li>
       <li>聊天文字、昵称及待显示队列仅在运行内存中临时处理，不写入持久聊天历史。下载的表情图片会保存在本机扩展的持久缓存中，最多保留 200 张，供后台重启后复用。缓存超过上限或被浏览器清除时需要重新下载。</li>
     </ul>
     <h2>4. 网络请求与第三方</h2>
+    <p>后台直连模式访问 <code>api.bilibili.com</code>、<code>api.live.bilibili.com</code> 和 B 站弹幕 WebSocket 服务器，以解析房间、获取公开签名和连接信息并接收消息。接口请求不携带浏览器账号 Cookie；连接采用匿名身份，不向 B 站发送用户聊天内容。B 站会接收到请求的房间号、签名及正常连接所需的网络信息，包括 IP 地址。</p>
     <p>本版本不向开发者运营的服务器传输弹幕、昵称、标签页信息、设置或分析事件，也不包含广告或统计跟踪 SDK。</p>
     <p>表情功能会向 <code>https://*.hdslb.com/</code> 下的 B 站图片 CDN 请求图片。这些请求不携带账号凭据或来源页面信息，扩展不会将弹幕正文和昵称作为请求内容发送给 CDN。图片服务器仍会接收到正常网络请求附带的 IP 地址及其他连接信息；这些信息由第三方按其政策处理。</p>
     <p>你正常访问 B 站、YouTube 或本隐私政策托管页面时，相应平台会按其自身政策处理访问数据。本扩展不控制这些平台。此政策页面没有自行添加分析脚本、表单或跟踪器。</p>
@@ -44,35 +45,38 @@
     <p>扩展仅为弹幕转发、显示、表情替换及必要设置处理上述信息。不出售用户数据，不用于广告画像、与核心功能无关的用途、信用评估或贷款决策。弹幕转发发生在同一浏览器内的已绑定页面之间，不会由本扩展发布到 YouTube 聊天区或发送给其他扩展用户。</p>
     <h2>6. 权限说明</h2>
     <ul>
-      <li><code>storage</code>：保存显示设置、表情映射、会话绑定与状态。</li>
+      <li><code>storage</code>：保存显示设置、连接偏好、上次输入、表情映射、会话绑定与状态。</li>
+      <li><code>alarms</code>：定期恢复会话中的后台直连。</li>
+      <li><code>https://api.bilibili.com/*</code>、<code>https://api.live.bilibili.com/*</code>：匿名获取房间及弹幕连接信息。</li>
       <li><code>https://live.bilibili.com/*</code>：访问直播聊天及表情相关页面内容。</li>
       <li><code>https://www.youtube.com/*</code>：识别目标页面并显示播放器弹幕层。</li>
       <li><code>https://*.hdslb.com/*</code>：下载已识别的表情图片。</li>
     </ul>
     <h2>7. 控制和删除</h2>
-    <p>关闭弹幕开关可以停止显示，但源页面脚本在扩展启用期间仍可能观察聊天并更新临时状态和表情映射。要停止扩展访问页面，请在浏览器中禁用扩展、撤销对应网站权限或关闭相关页面。卸载扩展可移除其本地存储及持久图片缓存；重新安装前也可通过浏览器提供的扩展数据管理功能清除数据（如支持）。</p>
+    <p>后台直连可点击「断开」停止，也会在目标 YouTube 标签页关闭时停止。关闭弹幕开关可以停止显示，但不会停止后台直连；源页面脚本在扩展启用期间仍可能观察聊天并更新临时状态和表情映射。要停止扩展访问页面，请在浏览器中禁用扩展、撤销对应网站权限或关闭相关页面。卸载扩展可移除其本地存储及持久图片缓存；重新安装前也可通过浏览器提供的扩展数据管理功能清除数据（如支持）。</p>
     <h2>8. 更新与联系</h2>
     <p>扩展数据处理方式变化时，本政策将相应更新并修改日期。有关本扩展或隐私的问题，请通过扩展商店详情页列出的开发者联系邮箱或支持入口联系发布者。</p>
   </section>
   <section id="en" lang="en" aria-label="English privacy policy">
     <h2>Privacy Policy — English</h2>
-    <p class="meta">Effective and updated: November 3, 2026 · Extension version: 0.1.14</p>
+    <p class="meta">Effective and updated: November 3, 2026 · Extension version: 0.1.15</p>
     <h2>1. Purpose</h2>
-    <p>Danmaku Bridge displays new messages from an open Bilibili live-room tab as scrolling comments over a YouTube player selected by the user. It supports appearance settings and recognized emoji images. This independent, unofficial extension is not affiliated with or endorsed by Bilibili, YouTube, Google or Microsoft.</p>
+    <p>Danmaku Bridge displays new messages received through a room ID, live-room URL or open Bilibili live-room tab as scrolling comments over a YouTube player selected by the user. It supports appearance settings and recognized emoji images. This independent, unofficial extension is not affiliated with or endorsed by Bilibili, YouTube, Google or Microsoft.</p>
     <h2>2. Information processed locally</h2>
-    <p>The extension reads new chat text and sender nicknames from open Bilibili live-room pages, matching Bilibili and YouTube tab titles, URLs and identifiers for selection and binding, emoji labels and image URLs, display preferences and temporary collection status. Nicknames are read even when their display is disabled. The extension does not collect a complete browsing history.</p>
+    <p>The extension reads new chat text and sender nicknames through a direct anonymous connection or open Bilibili live-room pages, matching Bilibili and YouTube tab titles, URLs and identifiers for selection and binding, emoji labels and image URLs, display preferences and temporary collection status. Nicknames are read even when their display is disabled. The extension does not collect a complete browsing history.</p>
     <h2>3. Storage and retention</h2>
-    <p>Display preferences and emoji-label-to-image-URL mappings are saved in extension local storage. Tab bindings, room identifiers, counters and update times are kept in session storage, which is cleared when the browser restarts or the extension session ends. Closing a tab removes its corresponding binding record. Chat text, nicknames and rendering queues are held temporarily in runtime memory and are not saved as persistent chat history. Downloaded emoji images are stored in the extension’s local persistent cache, up to 200 images, for reuse after background restarts. Evicted or cleared images must be downloaded again.</p>
+    <p>Display preferences, the connection mode, last entered room ID or URL, and emoji-label-to-image-URL mappings are saved in extension local storage. Tab bindings, room identifiers, counters and update times are kept in session storage, which is cleared when the browser restarts or the extension session ends. Closing a tab removes its corresponding binding record. Chat text, nicknames and rendering queues are held temporarily in runtime memory and are not saved as persistent chat history. Downloaded emoji images are stored in the extension’s local persistent cache, up to 200 images, for reuse after background restarts. Evicted or cleared images must be downloaded again.</p>
     <h2>4. Network requests</h2>
+    <p>Direct mode accesses api.bilibili.com, api.live.bilibili.com and Bilibili danmaku WebSocket servers to resolve rooms, obtain public signing and connection information, and receive messages. API requests omit browser account cookies, and the connection is anonymous. It does not send chat messages. Bilibili receives the requested room identifier, signature and normal connection information, including the IP address.</p>
     <p>This version does not send chat messages, nicknames, tab information, settings or analytics events to a developer-operated server. It includes no advertising or analytics SDKs.</p>
     <p>Emoji images are requested from Bilibili's image CDN at <code>https://*.hdslb.com/</code>. These requests omit account credentials and referrer information. The extension does not send chat text or nicknames as request content. The CDN still receives the IP address and connection information inherent in network requests and handles that information under its own policies.</p>
     <p>Bilibili, YouTube and the provider hosting this policy page independently process normal website visits under their own policies. This policy page contains no added analytics scripts, forms or trackers.</p>
     <h2>5. Use and disclosure</h2>
     <p>Information is used only for local chat relay, display, emoji rendering and necessary settings. The extension does not sell user data or use it for advertising profiles, unrelated purposes, creditworthiness or lending decisions. Relayed comments stay within bound pages in the same browser; the extension does not post them to YouTube chat or distribute them to other extension users.</p>
     <h2>6. Permissions</h2>
-    <p>Storage access saves preferences, emoji mappings and session state. Bilibili live-page access reads chat and emoji content. YouTube access identifies target pages and renders the overlay. Access to the hdslb.com image CDN downloads recognized emoji images.</p>
+    <p>Storage access saves display and connection preferences, the last input, emoji mappings and session state. Alarms periodically restore direct connections within the browser session. Access to api.bilibili.com and api.live.bilibili.com obtains anonymous room and connection information. Bilibili live-page access reads chat and emoji content. YouTube access identifies target pages and renders the overlay. Access to the hdslb.com image CDN downloads recognized emoji images.</p>
     <h2>7. Control and deletion</h2>
-    <p>Turning the overlay off stops display, but source-page scripts may continue observing chat and updating temporary status and emoji mappings while the extension remains enabled. Disable the extension, revoke its site access or close relevant pages to stop page access. Uninstall the extension to remove its local storage and persistent image cache, or use browser-provided extension data controls where available.</p>
+    <p>Disconnecting stops direct reception, as does closing the target YouTube tab. Turning the overlay off stops display without disconnecting. However, source-page scripts may continue observing chat and updating temporary status and emoji mappings while the extension remains enabled. Disable the extension, revoke its site access or close relevant pages to stop page access. Uninstall the extension to remove its local storage and persistent image cache, or use browser-provided extension data controls where available.</p>
     <h2>8. Updates and contact</h2>
     <p>This policy will be updated when data practices change. For extension or privacy questions, contact the publisher through the developer email or support channel listed on the extension's store page.</p>
   </section>

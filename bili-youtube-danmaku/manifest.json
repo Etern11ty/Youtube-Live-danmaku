@@ -1,15 +1,18 @@
 {
   "manifest_version": 3,
   "name": "弹幕桥·bilibili直播弹幕转接youtube",
-  "version": "0.1.14",
-  "description": "将已打开的B站直播间文字弹幕显示在YouTube播放器上。",
+  "version": "0.1.15",
+  "description": "通过房间号、直播间链接或已打开的B站标签页，将直播弹幕转接到YouTube播放器。",
   "permissions": [
-    "storage"
+    "storage",
+    "alarms"
   ],
   "host_permissions": [
     "https://live.bilibili.com/*",
     "https://www.youtube.com/*",
-    "https://*.hdslb.com/*"
+    "https://*.hdslb.com/*",
+    "https://api.bilibili.com/*",
+    "https://api.live.bilibili.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -62,5 +65,6 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "short_name": "弹幕桥"
+  "short_name": "弹幕桥",
+  "minimum_chrome_version": "116"
 }
