@@ -12,7 +12,11 @@ async function status(preferBinding=false){
   const id=Number($('target').value);const key='binding:'+id;
   const data=await chrome.storage.session.get(key),binding=data[key];
   if(!binding){connectionButton(false);$('status').textContent='尚未连接。请选择两个页面，然后点击连接。';return;}
-  const k='status:'+binding.sourceId;const s=(await chrome.storage.session.get(k))[k];
+  const k='status:'+binding.sourceId;
+  const records=await chrome.storage.session.get(null);
+  const frames=Object.entries(records).filter(([key,v])=>key.startsWith(k+':frame:') && Date.now()-v.at<20000).map(([,v])=>v);
+  frames.sort((a,b)=>Number(b.ready)-Number(a.ready) || (b.lastMessageAt || 0)-(a.lastMessageAt || 0) || b.at-a.at);
+  const s=frames[0] || records[k];
   const source=await chrome.tabs.get(binding.sourceId).catch(()=>null);
   if(!source || new URL(source.url).pathname.split('/')[1]!==binding.room){connectionButton(false);$('status').textContent='源直播间已关闭或切换，请重新连接。';return;}
   if(preferBinding)$('source').value=String(binding.sourceId);
@@ -20,7 +24,8 @@ async function status(preferBinding=false){
   connectionButton(selected);
   $('unbind').disabled=false;
   if(!selected){$('status').textContent=`当前仍绑定房间 ${binding.room}。点击连接直播间可切换到新选择的页面。`;return;}
-  $('status').textContent=`已绑定房间 ${binding.room}。`+(!s||Date.now()-s.at>20000?'采集状态未更新，请刷新 B 站页面。':s.ready?`已检测到聊天区域，本次观察到 ${s.count} 条新弹幕。`:'等待聊天区域加载，请检查 B 站页面。');
+  const context=s?.frameId?`已连接赛事页，当前内嵌房间 ${s.room || '未知'}。`:`已绑定房间 ${binding.room}。`;
+  $('status').textContent=context+(!s||Date.now()-s.at>20000?'采集状态未更新，请刷新 B 站页面。':s.ready?`已检测到聊天区域，本次观察到 ${s.count} 条新弹幕。`:'等待聊天区域加载，请检查 B 站页面。');
 }
 async function init(){
   settings={...defaults,...(await chrome.storage.local.get('settings')).settings};

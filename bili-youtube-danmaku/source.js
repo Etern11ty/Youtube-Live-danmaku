@@ -2,7 +2,7 @@
   const life=new DanmakuLifecycle();
   const selector = '.chat-item.danmaku-item, .danmaku-item[data-danmaku], .chat-item[data-danmaku]';
   const seen = new WeakSet();
-  let pending = [], count = 0;
+  let pending = [], count = 0,lastMessageAt=0;
   let catalog=Object.create(null),dirty=false,scanNeeded=true;
   let scales=Object.create(null);
   const metadata=[];
@@ -104,6 +104,7 @@
     pending.push({text,user,color:color || '#ffffff',_at:Date.now()});
     if (pending.length > 120) pending.shift();
     count++;
+    lastMessageAt=Date.now();
   }
   const observer=new MutationObserver(records=>{
     scanNeeded=true;
@@ -153,6 +154,6 @@
     if(scanNeeded){learn(document);scanNeeded=false;}
     if(dirty){catalog=DanmakuEmoji.cleanMap(catalog);scales=DanmakuEmoji.cleanScales(scales);life.call(()=>chrome.storage.local.set({emojiCatalog:catalog,emojiScales:scales}));dirty=false;}
   },1000);
-  const status = ()=>send({type:'status',count,ready:!!document.querySelector('#chat-items, .chat-history-list, .chat-history-panel, '+selector)});
+  const status = ()=>send({type:'status',count,lastMessageAt,ready:!!document.querySelector('#chat-items, .chat-history-list, .chat-history-panel, '+selector)});
   status(); life.every(status,5000);
 })();

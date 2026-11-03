@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "弹幕桥·bilibili直播弹幕转接youtube",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "将已打开的B站直播间文字弹幕显示在YouTube播放器上。",
   "permissions": [
     "storage"
@@ -30,7 +30,8 @@
         "page-meta.js"
       ],
       "run_at": "document_start",
-      "world": "MAIN"
+      "world": "MAIN",
+      "all_frames": true
     },
     {
       "matches": [
@@ -40,7 +41,8 @@
         "lifecycle.js",
         "emoji.js",
         "source.js"
-      ]
+      ],
+      "all_frames": true
     },
     {
       "matches": [
