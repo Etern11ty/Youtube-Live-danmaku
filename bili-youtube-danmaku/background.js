@@ -21,7 +21,7 @@ async function loadEmoji(url){
       const mime=response.headers.get('content-type')?.split(';')[0];
       if(!response.ok || !['image/png','image/jpeg','image/webp','image/gif','image/avif'].includes(mime))throw Error('invalid image');
       const reader=response.body.getReader();let length=0;const chunks=[];
-      while(true){const {done,value}=await reader.read();if(done)break;length+=value.length;if(length>200000){await reader.cancel();throw Error('image too large');}chunks.push(value);}
+      while(true){const {done,value}=await reader.read();if(done)break;length+=value.length;if(length>524288){await reader.cancel();throw Error('image too large');}chunks.push(value);}
       if(cache && !saved){
         const bytes=new Uint8Array(length);let offset=0;
         for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}

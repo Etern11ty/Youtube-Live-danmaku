@@ -6,9 +6,9 @@
 
 [**Edge 用户：从扩展商店安装**](https://microsoftedge.microsoft.com/addons/detail/%E5%BC%B9%E5%B9%95%E6%A1%A5%C2%B7bilibili%E7%9B%B4%E6%92%AD%E5%BC%B9%E5%B9%95%E8%BD%AC%E6%8E%A5youtube/pahnmkihokfhhiekbledcjanpkechoha)
 
-[下载 v0.1.13 安装包](弹幕桥-v0.1.13.zip) · [重要更新](#重要更新) · [反馈问题](https://github.com/Etern11ty/Youtube-Live-danmaku/issues)
+[下载 v0.1.14 安装包](弹幕桥-v0.1.14.zip) · [重要更新](#重要更新) · [反馈问题](https://github.com/Etern11ty/Youtube-Live-danmaku/issues)
 
-商店版与仓库版的更新进度可能不同。仓库当前版本为 **v0.1.13**。
+商店版与仓库版的更新进度可能不同。仓库当前版本为 **v0.1.14**。
 
 ## 功能
 
@@ -78,6 +78,14 @@
 本项目为非官方扩展，与 Bilibili、YouTube、Google 或 Microsoft 无隶属或背书关系。
 
 ## 重要更新
+
+### v0.1.14 · 特殊图片表情
+
+- 修复无名称的纯图片表情被跳过，以及图片地址延迟加载后无法采集的问题。
+- 补充整条图片消息和嵌套表情信息的替换，保留图文顺序，减少同名表情图片映射冲突。
+- 图片下载上限提高到 512KiB，并同步调整显示端限制，继续使用本机持久缓存。
+
+更新后重新加载扩展，刷新 Bilibili 与 YouTube 页面并重新连接。
 
 ### v0.1.13 · 弹幕吞吐与表情缓存
 

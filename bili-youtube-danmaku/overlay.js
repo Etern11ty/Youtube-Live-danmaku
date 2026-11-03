@@ -12,7 +12,7 @@
     if(!urls.length){await Promise.all(waiting);return;}
     const task=(async()=>{try{
       const r=await chrome.runtime.sendMessage({type:'emoji-assets',urls});
-      for(const url of urls){const data=r?.assets?.[url];if(typeof data==='string' && /^data:image\/(png|jpeg|webp|gif|avif);base64,[A-Za-z0-9+/=]+$/.test(data) && data.length<280000)emojiAssets.set(url,data);}
+      for(const url of urls){const data=r?.assets?.[url];if(typeof data==='string' && /^data:image\/(png|jpeg|webp|gif|avif);base64,[A-Za-z0-9+/=]+$/.test(data) && data.length<720000)emojiAssets.set(url,data);}
     }catch{}finally{urls.forEach(url=>emojiPending.delete(url));}})();
     urls.forEach(url=>emojiPending.set(url,task));
     await Promise.all([task,...waiting]);

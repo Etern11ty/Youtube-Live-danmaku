@@ -2,6 +2,7 @@
   const life=new DanmakuLifecycle();
   const selector = '.chat-item.danmaku-item, .danmaku-item[data-danmaku], .chat-item[data-danmaku]';
   const seen = new WeakSet();
+  const pendingNodes=new WeakMap();
   let pending = [], count = 0,lastMessageAt=0;
   let catalog=Object.create(null),dirty=false,scanNeeded=true;
   let scales=Object.create(null);
@@ -9,14 +10,15 @@
   const screenColors=new Map();
   const normalizeText=text=>String(text || '').normalize('NFC').replace(/[\u200b-\u200d\ufeff]/g,'').replace(/\s+/g,' ').trim();
   const normalizeUser=user=>normalizeText(user).replace(/[:：]\s*$/,'');
-  const matches=(m,item)=>Date.now()-m.at<8000 && (normalizeText(m.text)===normalizeText(item.text) || '['+normalizeText(m.text)+']'===normalizeText(item.text)) && (!m.user || !item.user || normalizeUser(m.user)===normalizeUser(item.user));
+  const matches=(m,item)=>Date.now()-m.at<8000 && (normalizeText(m.text)===normalizeText(item.text) || normalizeText(m.text)===normalizeText(item._raw) || normalizeText(m.renderText)===normalizeText(item.text) || '['+normalizeText(m.text)+']'===normalizeText(item.text)) && (!m.user || !item.user || normalizeUser(m.user)===normalizeUser(item.user));
   const onMetadata=event=>{
     if(life.stopped)return;
     const m=event.data;
     if(event.source!==window || event.origin!==location.origin || m?.channel!=='danmaku-bridge-meta-v1' || typeof m.text!=='string')return;
     const color=DanmakuEmoji.color(m.color);
-    if(!color)return;
-    metadata.push({text:m.text.trim().slice(0,200),user:String(m.user || '').trim().slice(0,40),color,emojis:DanmakuEmoji.cleanMap(m.emojis),emojiScales:DanmakuEmoji.cleanScales(m.emojiScales),at:Date.now()});
+    const emojis=DanmakuEmoji.cleanMap(m.emojis);
+    if(!color && !Object.keys(emojis).length)return;
+    metadata.push({text:m.text.trim().slice(0,200),renderText:typeof m.renderText==='string'?m.renderText.slice(0,200):'',user:String(m.user || '').trim().slice(0,40),color,emojis,emojiScales:DanmakuEmoji.cleanScales(m.emojiScales),at:Date.now()});
     while(metadata.length>400 || metadata.length && Date.now()-metadata[0].at>8000)metadata.shift();
   };
   if(typeof window!=='undefined'){
@@ -68,8 +70,14 @@
       if(node.nodeType===3)return node.textContent || '';
       if(node.nodeType!==1)return '';
       if(node.tagName==='IMG'){
-        const label=node.getAttribute('alt') || node.getAttribute('title') || '';
-        return label && !DanmakuEmoji.validCode(label)?'['+label+']':label;
+        const label=(node.getAttribute('alt') || node.getAttribute('title') || '').trim();
+        const url=DanmakuEmoji.safeUrl(node.currentSrc || node.getAttribute('src') || node.getAttribute('data-src'));
+        if(!url)return label && !DanmakuEmoji.validCode(label)?'['+label+']':label;
+        let hash=2166136261;for(let i=0;i<url.length;i++){hash^=url.charCodeAt(i);hash=Math.imul(hash,16777619);}
+        const code=DanmakuEmoji.validCode(label)?label:'[img_'+(hash>>>0).toString(36)+']';
+        if(catalog[code]!==url){catalog[code]=url;dirty=true;}
+        rememberScale(code,node,body);
+        return code;
       }
       return Array.from(node.childNodes).map(walk).join('');
     }
@@ -80,12 +88,15 @@
   document.querySelectorAll(selector).forEach(n=>seen.add(n));
   function collect(n) {
     if(life.stopped)return;
-    if (seen.has(n)) return;
+    const existing=pendingNodes.get(n);
+    if (seen.has(n) && !existing) return;
     const body = n.querySelector('.danmaku-content, .danmaku-item-content');
     learn(n);
-    let text = (n.getAttribute('data-danmaku') || readBody(body)).trim();
-    if (!text) return;
     const images=body?Array.from(body.querySelectorAll('img')):[];
+    const raw=(n.getAttribute('data-danmaku') || '').trim();
+    const rendered=readBody(body).trim();
+    let text=(images.length && rendered?rendered:raw || rendered).trim();
+    if (!text) return;
     if(images.length===1 && !body.textContent.trim() && !DanmakuEmoji.validCode(text) && text.length<=40 && !text.includes('['))text='['+text+']';
     const codes=text.match(/\[[^\[\]\r\n]{1,40}\]/g) || [];
     if(codes.length && codes.length===images.length){
@@ -101,21 +112,29 @@
     let color=DanmakuEmoji.color(declared);
     if(!color && /^\d{1,8}$/.test(declared || ''))color=DanmakuEmoji.color(Number(declared));
     if(!color && body && typeof getComputedStyle==='function')color=DanmakuEmoji.color(getComputedStyle(body).color);
-    pending.push({text,user,color:color || '#ffffff',_at:Date.now()});
+    const ownEmojis=Object.create(null),ownScales=Object.create(null);
+    for(const part of DanmakuEmoji.parts(text,catalog))if(part.url){ownEmojis[part.text]=part.url;if(scales[part.text])ownScales[part.text]=scales[part.text];}
+    const fields={text,user,color:color || '#ffffff',_raw:raw,_node:n,_emojis:ownEmojis,_scales:ownScales};
+    if(existing){Object.assign(existing,fields);return;}
+    const item={...fields,_at:Date.now()};pending.push(item);pendingNodes.set(n,item);
     if (pending.length > 120) pending.shift();
     count++;
     lastMessageAt=Date.now();
   }
   const observer=new MutationObserver(records=>{
     scanNeeded=true;
-    for (const r of records) for (const n of r.addedNodes) {
+    for (const r of records) for (const n of r.addedNodes || []) {
       if (n.nodeType !== 1) {const parent=n.parentElement?.closest(selector);if(parent)collect(parent);continue;}
       if (n.matches(selector)) collect(n);
       n.querySelectorAll(selector).forEach(collect);
       const parent = n.closest(selector); if (parent) collect(parent);
     }
+    for(const r of records)if(r.type==='attributes' || r.type==='characterData'){
+      const node=r.target.nodeType===1?r.target:r.target.parentElement;
+      const parent=node?.closest(selector);if(parent)collect(parent);
+    }
   });
-  observer.observe(document.documentElement,{childList:true,subtree:true});
+  observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['src','data-src','alt','title','data-danmaku']});
   life.onStop(()=>{observer.disconnect();pending=[];metadata.length=0;screenColors.clear();});
   life.every(()=>{
     if (pending.length) {
@@ -132,7 +151,8 @@
         const index=metadata.findIndex(m=>matches(m,item));
         const meta=index>=0?metadata.splice(index,1)[0]:null;
         if(meta){
-          item.color=meta.color;
+          if(meta.color)item.color=meta.color;
+          if(meta.renderText && Object.keys(meta.emojis).length)item.text=meta.renderText;
           Object.assign(catalog,meta.emojis);Object.assign(scales,meta.emojiScales);
           if(Object.keys(meta.emojis).length)dirty=true;
         }else{
@@ -141,9 +161,12 @@
         }
         const emojis=Object.create(null);
         const emojiScales=Object.create(null);
-        for(const p of DanmakuEmoji.parts(item.text,catalog))if(p.url)emojis[p.text]=p.url;
-        for(const code of Object.keys(emojis))if(scales[code]===1.8)emojiScales[code]=1.8;
-        const { _at,...message }=item;
+        const mappings={...catalog,...item._emojis,...meta?.emojis};
+        const sizes={...scales,...item._scales,...meta?.emojiScales};
+        for(const p of DanmakuEmoji.parts(item.text,mappings))if(p.url)emojis[p.text]=p.url;
+        for(const code of Object.keys(emojis))if(sizes[code]===1.8)emojiScales[code]=1.8;
+        pendingNodes.delete(item._node);
+        const { _at,_node,_raw,_emojis,_scales,...message }=item;
         return {...message,emojis,emojiScales};
       });
       if(items.length)send({type:'danmaku',items});
