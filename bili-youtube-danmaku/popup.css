@@ -2,3 +2,5 @@
 button:disabled{cursor:default;opacity:.65}
 
 header{flex-wrap:wrap;gap:6px}header span{font-size:18px;line-height:1.5;overflow-wrap:anywhere}header small{display:block;width:100%}
+
+body{padding:16px}label{margin:8px 0}select{padding:6px;margin-top:4px}.range-row{display:grid;grid-template-columns:64px minmax(0,1fr) 28px;gap:8px;align-items:center;min-height:28px}.range-row input[type=range]{margin:0;min-width:0}.range-row output{float:none;text-align:right;font-variant-numeric:tabular-nums}#status{padding:8px;margin-top:8px;max-height:80px;overflow:auto}header span{font-size:16px}

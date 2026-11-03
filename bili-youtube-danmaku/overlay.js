@@ -4,14 +4,18 @@
   let settings = {...defaults}, host, root, layer, queue=[], lastUrl=location.href;
   const layout=new DanmakuLayout();
   const emojiAssets=new Map();
+  const emojiPending=new Map();
   async function prepareEmoji(items){
-    const urls=[...new Set(items.flatMap(item=>Object.values(DanmakuEmoji.cleanMap(item.emojis))))].filter(url=>!emojiAssets.has(url)).slice(0,16);
-    if(!urls.length)return;
-    urls.forEach(url=>emojiAssets.set(url,null));
-    try{
+    const requested=[...new Set(items.flatMap(item=>Object.values(DanmakuEmoji.cleanMap(item.emojis))))].slice(0,16);
+    const urls=requested.filter(url=>!emojiAssets.has(url) && !emojiPending.has(url));
+    const waiting=requested.map(url=>emojiPending.get(url)).filter(Boolean);
+    if(!urls.length){await Promise.all(waiting);return;}
+    const task=(async()=>{try{
       const r=await chrome.runtime.sendMessage({type:'emoji-assets',urls});
       for(const url of urls){const data=r?.assets?.[url];if(typeof data==='string' && /^data:image\/(png|jpeg|webp|gif|avif);base64,[A-Za-z0-9+/=]+$/.test(data) && data.length<280000)emojiAssets.set(url,data);}
-    }catch{}
+    }catch{}finally{urls.forEach(url=>emojiPending.delete(url));}})();
+    urls.forEach(url=>emojiPending.set(url,task));
+    await Promise.all([task,...waiting]);
     while(emojiAssets.size>200)emojiAssets.delete(emojiAssets.keys().next().value);
   }
   function fillMessage(el,item){
@@ -71,7 +75,7 @@
     if(settings.enabled || m.demo){
       const items=m.items.slice(0,30).map(item=>({...item,received:performance.now(),ready:!Object.keys(item.emojis || {}).length}));
       queue.push(...items);queue=queue.slice(-100);
-      prepareEmoji(items).finally(()=>items.forEach(item=>item.ready=true));
+      items.forEach(item=>{if(!item.ready)prepareEmoji([item]).finally(()=>item.ready=true);});
     }
     reply({ok:true});
   });
@@ -81,16 +85,30 @@
     const now=performance.now();
     queue=queue.filter(item=>now-item.received<8000);
     if(!queue.length)return;
-    // At most 1.2s for image preparation; failed/slow downloads retain textual labels.
-    if(!queue[0].ready && now-queue[0].received<1200)return;
-      const item=queue[0], el=document.createElement('div');el.className='msg';
+    // Prepare a batch before measuring, so layout isn't forced once per message.
+    const capacity=queue.length>30?16:queue.length>8?8:2;
+    const candidates=[];
+    for(const item of queue){
+      if(candidates.length>=capacity)break;
+      if(!item.ready && now-item.received<1200)continue;
+      const el=document.createElement('div');el.className='msg';
       fillMessage(el,item);
       el.style.cssText=`visibility:hidden;font-size:${size}px;opacity:${clamp(settings.opacity,20,100)/100};color:${settings.useColor!==false ? (DanmakuEmoji.color(item.color) || '#ffffff') : '#ffffff'};`;
-      layer.append(el);const rect=el.getBoundingClientRect(), width=rect.width;
-      const slot=layout.place({now,width:host.clientWidth,height:host.clientHeight*clamp(settings.area,20,100)/100,messageWidth:width,messageHeight:rect.height,duration});
-      if(!slot){el.remove();return;}
-      queue.shift();el.style.top=slot.top+'px';el.style.visibility='visible';
-      const animation=el.animate([{transform:`translateX(${host.clientWidth}px)`},{transform:`translateX(${-width}px)`}],{duration,easing:'linear'});
+      candidates.push({item,el});
+    }
+    if(!candidates.length)return;
+    layer.append(...candidates.map(c=>c.el));
+    const playerWidth=host.clientWidth,playerHeight=host.clientHeight*clamp(settings.area,20,100)/100;
+    candidates.forEach(c=>c.rect=c.el.getBoundingClientRect());
+    const displayed=new Set();
+    for(const {item,el,rect} of candidates){
+      const width=rect.width;
+      const slot=layout.place({now,width:playerWidth,height:playerHeight,messageWidth:width,messageHeight:rect.height,duration});
+      if(!slot){el.remove();continue;}
+      displayed.add(item);el.style.top=slot.top+'px';el.style.visibility='visible';
+      const animation=el.animate([{transform:`translateX(${playerWidth}px)`},{transform:`translateX(${-width}px)`}],{duration,easing:'linear'});
       animation.onfinish=()=>el.remove();
-  },150);
+    }
+    if(displayed.size)queue=queue.filter(item=>!displayed.has(item));
+  },50);
 })();

@@ -1,18 +1,37 @@
 importScripts('emoji.js');
 const imageJobs=new Map();
+let imageDownloads=0;
+const imageWaiters=[];
+const imageFailures=new Map();
+async function imageSlot(task){
+  if(imageDownloads>=4)await new Promise(resolve=>imageWaiters.push(resolve));
+  else imageDownloads++;
+  try{return await task();}finally{const next=imageWaiters.shift();if(next)next();else imageDownloads--;}
+}
 const recentMessages=new Map();
 function frameRoom(url){try{return new URL(url).pathname.match(/^\/(?:blanc\/)?(\d+)(?:\/|$)/)?.[1] || '';}catch{return '';}}
 async function loadEmoji(url){
+  if(Date.now()-(imageFailures.get(url)||0)<30000)return null;
   if(!imageJobs.has(url)){
-    const job=(async()=>{
-      const response=await fetch(url,{credentials:'omit',referrerPolicy:'no-referrer',redirect:'error',signal:AbortSignal.timeout(4000)});
+    const job=imageSlot(async()=>{
+      // Cache Storage survives background suspension, page reload and browser restart.
+      const cache=typeof caches!=='undefined'?await caches.open('danmaku-emoji-v1').catch(()=>null):null;
+      const saved=cache?await cache.match(url).catch(()=>null):null;
+      const response=saved || await fetch(url,{credentials:'omit',referrerPolicy:'no-referrer',redirect:'error',signal:AbortSignal.timeout(4000)});
       const mime=response.headers.get('content-type')?.split(';')[0];
       if(!response.ok || !['image/png','image/jpeg','image/webp','image/gif','image/avif'].includes(mime))throw Error('invalid image');
       const reader=response.body.getReader();let length=0;const chunks=[];
       while(true){const {done,value}=await reader.read();if(done)break;length+=value.length;if(length>200000){await reader.cancel();throw Error('image too large');}chunks.push(value);}
+      if(cache && !saved){
+        const bytes=new Uint8Array(length);let offset=0;
+        for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
+        await cache.put(url,new Response(bytes,{headers:{'Content-Type':mime}})).catch(()=>{});
+        const keys=await cache.keys().catch(()=>[]);
+        await Promise.all(keys.slice(0,Math.max(0,keys.length-200)).map(key=>cache.delete(key).catch(()=>{})));
+      }
       let binary='';for(const chunk of chunks)for(const byte of chunk)binary+=String.fromCharCode(byte);
       return `data:${mime};base64,${btoa(binary)}`;
-    })().catch(()=>null);
+    }).catch(()=>{imageFailures.set(url,Date.now());imageJobs.delete(url);if(imageFailures.size>200)imageFailures.delete(imageFailures.keys().next().value);return null;});
     imageJobs.set(url,job);
     if(imageJobs.size>200)imageJobs.delete(imageJobs.keys().next().value);
   }

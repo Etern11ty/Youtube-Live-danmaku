@@ -16,7 +16,7 @@
 </head>
 <body><main>
   <header><div class="brand">弹幕桥·bilibili直播弹幕转接youtube</div><h1>隐私政策 / Privacy Policy</h1>
-    <p class="meta">生效及更新日期：2026年11月1日 · 适用于扩展 v0.1.3</p>
+    <p class="meta">生效及更新日期：2026年11月3日 · 适用于扩展 v0.1.13</p>
     <nav><a href="#zh">中文</a> · <a href="#en" lang="en">English</a></nav>
   </header>
   <section id="zh" aria-label="中文隐私政策">
@@ -34,7 +34,7 @@
     <ul>
       <li>显示设置和表情标记到图片地址的映射保存在浏览器的扩展本地存储中，供后续使用。</li>
       <li>标签页绑定、直播间号、采集计数和更新时间保存在扩展会话存储中；浏览器重新启动或扩展会话结束时清除。关闭标签页也会移除该标签页对应的绑定记录。</li>
-      <li>聊天文字、昵称、待显示队列及下载的表情图片仅在运行内存中临时处理，不写入持久聊天历史。图片缓存可能在扩展后台停止运行后释放。</li>
+      <li>聊天文字、昵称及待显示队列仅在运行内存中临时处理，不写入持久聊天历史。下载的表情图片会保存在本机扩展的持久缓存中，最多保留 200 张，供后台重启后复用。缓存超过上限或被浏览器清除时需要重新下载。</li>
     </ul>
     <h2>4. 网络请求与第三方</h2>
     <p>本版本不向开发者运营的服务器传输弹幕、昵称、标签页信息、设置或分析事件，也不包含广告或统计跟踪 SDK。</p>
@@ -50,19 +50,19 @@
       <li><code>https://*.hdslb.com/*</code>：下载已识别的表情图片。</li>
     </ul>
     <h2>7. 控制和删除</h2>
-    <p>关闭弹幕开关可以停止显示，但源页面脚本在扩展启用期间仍可能观察聊天并更新临时状态和表情映射。要停止扩展访问页面，请在浏览器中禁用扩展、撤销对应网站权限或关闭相关页面。卸载扩展可移除其浏览器本地存储；重新安装前也可通过浏览器提供的扩展数据管理功能清除数据（如支持）。</p>
+    <p>关闭弹幕开关可以停止显示，但源页面脚本在扩展启用期间仍可能观察聊天并更新临时状态和表情映射。要停止扩展访问页面，请在浏览器中禁用扩展、撤销对应网站权限或关闭相关页面。卸载扩展可移除其本地存储及持久图片缓存；重新安装前也可通过浏览器提供的扩展数据管理功能清除数据（如支持）。</p>
     <h2>8. 更新与联系</h2>
     <p>扩展数据处理方式变化时，本政策将相应更新并修改日期。有关本扩展或隐私的问题，请通过扩展商店详情页列出的开发者联系邮箱或支持入口联系发布者。</p>
   </section>
   <section id="en" lang="en" aria-label="English privacy policy">
     <h2>Privacy Policy — English</h2>
-    <p class="meta">Effective and updated: November 1, 2026 · Extension version: 0.1.3</p>
+    <p class="meta">Effective and updated: November 3, 2026 · Extension version: 0.1.13</p>
     <h2>1. Purpose</h2>
     <p>Danmaku Bridge displays new messages from an open Bilibili live-room tab as scrolling comments over a YouTube player selected by the user. It supports appearance settings and recognized emoji images. This independent, unofficial extension is not affiliated with or endorsed by Bilibili, YouTube, Google or Microsoft.</p>
     <h2>2. Information processed locally</h2>
     <p>The extension reads new chat text and sender nicknames from open Bilibili live-room pages, matching Bilibili and YouTube tab titles, URLs and identifiers for selection and binding, emoji labels and image URLs, display preferences and temporary collection status. Nicknames are read even when their display is disabled. The extension does not collect a complete browsing history.</p>
     <h2>3. Storage and retention</h2>
-    <p>Display preferences and emoji-label-to-image-URL mappings are saved in extension local storage. Tab bindings, room identifiers, counters and update times are kept in session storage, which is cleared when the browser restarts or the extension session ends. Closing a tab removes its corresponding binding record. Chat text, nicknames, rendering queues and downloaded image caches are held temporarily in runtime memory, not stored as persistent chat history.</p>
+    <p>Display preferences and emoji-label-to-image-URL mappings are saved in extension local storage. Tab bindings, room identifiers, counters and update times are kept in session storage, which is cleared when the browser restarts or the extension session ends. Closing a tab removes its corresponding binding record. Chat text, nicknames and rendering queues are held temporarily in runtime memory and are not saved as persistent chat history. Downloaded emoji images are stored in the extension’s local persistent cache, up to 200 images, for reuse after background restarts. Evicted or cleared images must be downloaded again.</p>
     <h2>4. Network requests</h2>
     <p>This version does not send chat messages, nicknames, tab information, settings or analytics events to a developer-operated server. It includes no advertising or analytics SDKs.</p>
     <p>Emoji images are requested from Bilibili's image CDN at <code>https://*.hdslb.com/</code>. These requests omit account credentials and referrer information. The extension does not send chat text or nicknames as request content. The CDN still receives the IP address and connection information inherent in network requests and handles that information under its own policies.</p>
@@ -72,7 +72,7 @@
     <h2>6. Permissions</h2>
     <p>Storage access saves preferences, emoji mappings and session state. Bilibili live-page access reads chat and emoji content. YouTube access identifies target pages and renders the overlay. Access to the hdslb.com image CDN downloads recognized emoji images.</p>
     <h2>7. Control and deletion</h2>
-    <p>Turning the overlay off stops display, but source-page scripts may continue observing chat and updating temporary status and emoji mappings while the extension remains enabled. Disable the extension, revoke its site access or close relevant pages to stop page access. Uninstall the extension to remove its browser local storage, or use browser-provided extension data controls where available.</p>
+    <p>Turning the overlay off stops display, but source-page scripts may continue observing chat and updating temporary status and emoji mappings while the extension remains enabled. Disable the extension, revoke its site access or close relevant pages to stop page access. Uninstall the extension to remove its local storage and persistent image cache, or use browser-provided extension data controls where available.</p>
     <h2>8. Updates and contact</h2>
     <p>This policy will be updated when data practices change. For extension or privacy questions, contact the publisher through the developer email or support channel listed on the extension's store page.</p>
   </section>
