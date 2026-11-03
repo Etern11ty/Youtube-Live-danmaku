@@ -85,30 +85,20 @@
     const now=performance.now();
     queue=queue.filter(item=>now-item.received<8000);
     if(!queue.length)return;
-    // Prepare a batch before measuring, so layout isn't forced once per message.
-    const capacity=queue.length>30?16:queue.length>8?8:2;
-    const candidates=[];
-    for(const item of queue){
-      if(candidates.length>=capacity)break;
-      if(!item.ready && now-item.received<1200)continue;
-      const el=document.createElement('div');el.className='msg';
-      fillMessage(el,item);
-      el.style.cssText=`visibility:hidden;font-size:${size}px;opacity:${clamp(settings.opacity,20,100)/100};color:${settings.useColor!==false ? (DanmakuEmoji.color(item.color) || '#ffffff') : '#ffffff'};`;
-      candidates.push({item,el});
-    }
-    if(!candidates.length)return;
-    layer.append(...candidates.map(c=>c.el));
+    // Launch one message at a steady cadence instead of simultaneous vertical waves.
+    // Ready text may bypass an emoji that is still downloading.
+    const index=queue.findIndex(item=>item.ready || now-item.received>=1200);
+    if(index<0)return;
+    const item=queue[index],el=document.createElement('div');el.className='msg';
+    fillMessage(el,item);
+    el.style.cssText=`visibility:hidden;font-size:${size}px;opacity:${clamp(settings.opacity,20,100)/100};color:${settings.useColor!==false ? (DanmakuEmoji.color(item.color) || '#ffffff') : '#ffffff'};`;
+    layer.append(el);
     const playerWidth=host.clientWidth,playerHeight=host.clientHeight*clamp(settings.area,20,100)/100;
-    candidates.forEach(c=>c.rect=c.el.getBoundingClientRect());
-    const displayed=new Set();
-    for(const {item,el,rect} of candidates){
-      const width=rect.width;
-      const slot=layout.place({now,width:playerWidth,height:playerHeight,messageWidth:width,messageHeight:rect.height,duration});
-      if(!slot){el.remove();continue;}
-      displayed.add(item);el.style.top=slot.top+'px';el.style.visibility='visible';
-      const animation=el.animate([{transform:`translateX(${playerWidth}px)`},{transform:`translateX(${-width}px)`}],{duration,easing:'linear'});
-      animation.onfinish=()=>el.remove();
-    }
-    if(displayed.size)queue=queue.filter(item=>!displayed.has(item));
-  },50);
+    const rect=el.getBoundingClientRect(),width=rect.width;
+    const slot=layout.place({now,width:playerWidth,height:playerHeight,messageWidth:width,messageHeight:rect.height,duration});
+    if(!slot){el.remove();return;}
+    queue.splice(index,1);el.style.top=slot.top+'px';el.style.visibility='visible';
+    const animation=el.animate([{transform:`translateX(${playerWidth}px)`},{transform:`translateX(${-width}px)`}],{duration,easing:'linear'});
+    animation.onfinish=()=>el.remove();
+  },30);
 })();

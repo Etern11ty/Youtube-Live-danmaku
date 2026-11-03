@@ -5,7 +5,7 @@
     clear(){this.active=[];}
     place({now,width,height,messageWidth,messageHeight,duration}){
       this.active=this.active.filter(x=>x.end>now);
-      const gap=24, verticalGap=4;
+      const gap=16, verticalGap=4;
       const speed=(width+messageWidth)/duration;
       const maxTop=height-messageHeight-8;
       if(maxTop<8)return null;
