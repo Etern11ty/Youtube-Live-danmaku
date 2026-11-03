@@ -26,7 +26,7 @@
 4. 选择仓库内的 **`bili-youtube-danmaku` 文件夹**，该文件夹中包含 `manifest.json`。不要选择仓库根目录。
 5. 刷新已经打开的 B 站和 YouTube 标签页。
 
-请保留加载时选择的文件夹。仓库根目录的 `弹幕桥-v0.1.4.zip` 是旧安装包，最新源码版本以 `bili-youtube-danmaku/manifest.json` 为准。
+请保留加载时选择的文件夹。也可直接下载仓库根目录的 [v0.1.11 安装包](弹幕桥-v0.1.11.zip)。解压后选择直接包含 `manifest.json` 的文件夹加载；最新源码版本以 `bili-youtube-danmaku/manifest.json` 为准。
 
 ## 使用
 
