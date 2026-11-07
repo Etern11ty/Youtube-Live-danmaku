@@ -6,9 +6,9 @@
 
 [**Edge 用户：从扩展商店安装**](https://microsoftedge.microsoft.com/addons/detail/%E5%BC%B9%E5%B9%95%E6%A1%A5%C2%B7bilibili%E7%9B%B4%E6%92%AD%E5%BC%B9%E5%B9%95%E8%BD%AC%E6%8E%A5youtube/pahnmkihokfhhiekbledcjanpkechoha)
 
-[下载 v0.1.16 安装包](弹幕桥-v0.1.16.zip) · [重要更新](#重要更新) · [反馈问题](https://github.com/Etern11ty/Youtube-Live-danmaku/issues)
+[下载 v0.1.17 安装包](弹幕桥-v0.1.17.zip) · [重要更新](#重要更新) · [反馈问题](https://github.com/Etern11ty/Youtube-Live-danmaku/issues)
 
-商店版与仓库版的更新进度可能不同。仓库当前版本为 **v0.1.16**。
+商店版与仓库版的更新进度可能不同。仓库当前版本为 **v0.1.17**。
 
 ## 功能
 

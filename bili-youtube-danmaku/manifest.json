@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "弹幕桥·bilibili直播弹幕转接youtube",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "通过房间号、直播间链接或已打开的B站标签页，将直播弹幕转接到YouTube播放器。",
   "permissions": [
     "storage",
