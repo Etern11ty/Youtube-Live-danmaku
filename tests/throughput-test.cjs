@@ -4,8 +4,8 @@ function fixture(){
  let now=0,receive,tick;const animated=[];
  function node(){return {style:{},clientWidth:1000,clientHeight:2400,append(...items){items.forEach(i=>i.parentElement=this);},attachShadow:()=>node(),replaceChildren(){},remove(){},getBoundingClientRect:()=>({width:200,height:36}),animate(frames){animated.push({text:this.textContent,frames,top:this.style.top,at:now});return {};}};}
  const player=node();player.querySelector=()=>true;
- const ctx=vm.createContext({URL,chrome:{runtime:{id:'test',onMessage:{addListener:f=>receive=f},sendMessage:()=>new Promise(()=>{})},storage:{local:{get:async()=>({})},onChanged:{addListener(){}}}},document:{querySelector:()=>player,createElement:node,createTextNode:text=>({textContent:text}),hidden:false},location:{href:'test'},setInterval:f=>tick=f,clearInterval(){},performance:{now:()=>now}});
- for(const file of ['emoji.js','lifecycle.js','layout.js','overlay.js'])vm.runInContext(fs.readFileSync(base+file,'utf8'),ctx);
+ const ctx=vm.createContext({URL,getComputedStyle:()=>({position:'relative'}),chrome:{runtime:{id:'test',onMessage:{addListener:f=>receive=f},sendMessage:()=>new Promise(()=>{})},storage:{local:{get:async()=>({})},onChanged:{addListener(){}}}},document:{querySelector:()=>player,createElement:node,createTextNode:text=>({textContent:text}),hidden:false},location:{href:'test'},setInterval:f=>tick=f,clearInterval(){},performance:{now:()=>now}});
+ for(const file of ['youtube.js','emoji.js','lifecycle.js','layout.js','overlay.js'])vm.runInContext(fs.readFileSync(base+file,'utf8'),ctx);
  return {animated,send:items=>receive({type:'render',items},null,()=>{}),tick:time=>{now=time;tick();}};
 }
 const burst=fixture();burst.send(Array.from({length:30},(_,i)=>({text:'burst-'+i})));burst.tick(0);

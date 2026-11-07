@@ -1,5 +1,6 @@
 importScripts('emoji.js');
 importScripts('direct.js');
+importScripts('youtube.js');
 const directConnections=new Map();
 function stopDirect(target){
   const job=directConnections.get(target);if(!job)return;
@@ -33,7 +34,7 @@ async function restoreDirect(){
     const target=Number(key.slice(8)),tab=await chrome.tabs.get(target).catch(()=>null);
     const current=(await chrome.storage.session.get(key))[key];
     if(current?.mode!=='direct' || current.room!==b.room)continue;
-    if(tab?.url?.startsWith('https://www.youtube.com/'))startDirect(target,current);
+    if(DanmakuYouTube.isUrl(tab?.url))startDirect(target,current);
     else{stopDirect(target);await chrome.storage.session.remove([key,'direct-status:'+target]);}
   }
 }
@@ -83,7 +84,7 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
     const source = sender.tab?.url || '';
     const frameUrl=sender.url || source;
     const isLiveSource=source.startsWith('https://live.bilibili.com/') && frameUrl.startsWith('https://live.bilibili.com/');
-    if(m.type==='emoji-assets' && source.startsWith('https://www.youtube.com/')){
+    if(m.type==='emoji-assets' && DanmakuYouTube.isUrl(source)){
       const urls=[...new Set((Array.isArray(m.urls)?m.urls:[]).map(DanmakuEmoji.safeUrl).filter(Boolean))].slice(0,16);
       const assets=Object.create(null);
       // Bound fetch concurrency; only the Bilibili image CDN is allowed.
@@ -93,7 +94,7 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
     if (m.type === 'bind') {
       if (sender.tab || !Number.isInteger(m.target) || !Number.isInteger(m.source)) throw Error('无效绑定');
       const [target, origin] = await Promise.all([chrome.tabs.get(m.target), chrome.tabs.get(m.source)]);
-      if (!target.url?.startsWith('https://www.youtube.com/') || !/^https:\/\/live\.bilibili\.com\/\d+/.test(origin.url || '')) throw Error('请选择有效页面');
+      if (!DanmakuYouTube.isUrl(target.url) || !/^https:\/\/live\.bilibili\.com\/\d+/.test(origin.url || '')) throw Error('请选择有效页面');
       await directReady;stopDirect(target.id);
       await chrome.storage.session.remove('direct-status:'+target.id);
       await chrome.storage.session.set({['binding:'+target.id]: {mode:'tab',sourceId:origin.id, room:new URL(origin.url).pathname.split('/')[1]}});
@@ -102,7 +103,7 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
     if(m.type==='bind-direct' && !sender.tab){
       if(!Number.isInteger(m.target))throw Error('请选择 YouTube 页面。');
       const target=await chrome.tabs.get(m.target);
-      if(!target.url?.startsWith('https://www.youtube.com/'))throw Error('请选择有效的 YouTube 页面。');
+      if(!DanmakuYouTube.isUrl(target.url))throw Error('请选择有效的 YouTube 页面。');
       const room=DanmakuDirect.roomInput(m.room);await directReady;stopDirect(m.target);
       const binding={mode:'direct',room};
       await chrome.storage.session.remove('direct-status:'+m.target);
@@ -140,6 +141,7 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
       return {ok:true};
     }
     if (m.type === 'demo' && !sender.tab) {
+      const target=await chrome.tabs.get(m.target);if(!DanmakuYouTube.isUrl(target?.url))throw Error('请选择有效的 YouTube 页面。');
       await chrome.tabs.sendMessage(m.target,{type:'render',demo:true,items:[{text:'弹幕桥连接测试成功 ✨',user:'测试'},{text:'这里将显示 B 站直播间弹幕',user:'弹幕桥'}]});
       return {ok:true};
     }
@@ -156,7 +158,7 @@ chrome.tabs.onRemoved.addListener(async id=>{
   await Promise.all(Object.keys(all).filter(k=>k.startsWith('status:'+id+':frame:')).map(k=>chrome.storage.session.remove(k)));
 });
 chrome.tabs.onUpdated?.addListener((id,change)=>{
-  if(change.url && !change.url.startsWith('https://www.youtube.com/')){
+  if(change.url && !DanmakuYouTube.isUrl(change.url)){
     stopDirect(id);chrome.storage.session.remove(['binding:'+id,'direct-status:'+id]).catch(()=>{});
   }
 });

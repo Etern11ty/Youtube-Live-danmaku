@@ -47,7 +47,7 @@ async function init(){
   const saved=await chrome.storage.local.get(['settings','connectionMode','lastRoom']);
   settings={...defaults,...saved.settings};$('mode').value=saved.connectionMode==='tab'?'tab':'direct';$('room').value=saved.lastRoom || '';modeUI();
   const tabs=await chrome.tabs.query({});
-  for(const [id,filter] of [['target',t=>t.url?.startsWith('https://www.youtube.com/')],['source',t=>/^https:\/\/live\.bilibili\.com\/\d+/.test(t.url||'')]]){
+  for(const [id,filter] of [['target',t=>DanmakuYouTube.isUrl(t.url)],['source',t=>/^https:\/\/live\.bilibili\.com\/\d+/.test(t.url||'')]]){
     const list=tabs.filter(filter);$(id).append(new Option(list.length?'请选择页面':'未找到页面，请先打开',''));
     list.forEach(t=>$(id).append(new Option(t.title||t.url,String(t.id))));
     const selected=list.find(t=>t.active)||list[0];if(selected)$(id).value=String(selected.id);

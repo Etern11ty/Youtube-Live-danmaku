@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "弹幕桥·bilibili直播弹幕转接youtube",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "通过房间号、直播间链接或已打开的B站标签页，将直播弹幕转接到YouTube播放器。",
   "permissions": [
     "storage",
@@ -12,7 +12,8 @@
     "https://www.youtube.com/*",
     "https://*.hdslb.com/*",
     "https://api.bilibili.com/*",
-    "https://api.live.bilibili.com/*"
+    "https://api.live.bilibili.com/*",
+    "https://m.youtube.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -49,9 +50,11 @@
     },
     {
       "matches": [
-        "https://www.youtube.com/*"
+        "https://www.youtube.com/*",
+        "https://m.youtube.com/*"
       ],
       "js": [
+        "youtube.js",
         "lifecycle.js",
         "emoji.js",
         "layout.js",

@@ -6,12 +6,13 @@
 
 [**Edge 用户：从扩展商店安装**](https://microsoftedge.microsoft.com/addons/detail/%E5%BC%B9%E5%B9%95%E6%A1%A5%C2%B7bilibili%E7%9B%B4%E6%92%AD%E5%BC%B9%E5%B9%95%E8%BD%AC%E6%8E%A5youtube/pahnmkihokfhhiekbledcjanpkechoha)
 
-[下载 v0.1.15 安装包](弹幕桥-v0.1.15.zip) · [重要更新](#重要更新) · [反馈问题](https://github.com/Etern11ty/Youtube-Live-danmaku/issues)
+[下载 v0.1.16 安装包](弹幕桥-v0.1.16.zip) · [重要更新](#重要更新) · [反馈问题](https://github.com/Etern11ty/Youtube-Live-danmaku/issues)
 
-商店版与仓库版的更新进度可能不同。仓库当前版本为 **v0.1.15**。
+商店版与仓库版的更新进度可能不同。仓库当前版本为 **v0.1.16**。
 
 ## 功能
 
+- 支持 YouTube 桌面网页与移动网页（`www.youtube.com` / `m.youtube.com`）。
 - 支持后台直连：输入房间号或 Bilibili 直播间链接，无需打开 B 站标签页。
 - 也可绑定已打开的 Bilibili 直播间标签页，实时转接新弹幕。
 - 后台直连支持匿名接收、连接状态与断线重连。
@@ -61,6 +62,14 @@
 
 「发送测试弹幕」可检查 YouTube 弹幕层是否正常显示。测试成功不代表已经收到 B 站消息。
 
+## 移动端
+
+在能安装本扩展的移动浏览器中打开 YouTube 网页，选择该页面后使用后台直连，不必切换为桌面版网站。设置面板适配窄屏与触摸操作。
+
+本次补充的是移动网页适配，不能给 YouTube App 叠加弹幕，也不代表所有手机浏览器都支持安装本扩展。iPhone/iPad 版 Edge 已有扩展功能，但弹幕桥是否可安装、后台连接是否受限仍需对应设备验证。
+
+横竖屏切换或网页播放器尺寸变化后，会清理旧轨道并在新尺寸内继续显示。系统原生视频全屏及画中画可能不携带网页弹幕层；优先使用网页播放器内的全屏。
+
 ## 设置
 
 | 设置 | 作用 |
@@ -94,6 +103,14 @@
 本项目为非官方扩展，与 Bilibili、YouTube、Google 或 Microsoft 无隶属或背书关系。
 
 ## 重要更新
+
+### v0.1.16 · 移动版 YouTube 网页
+
+- 新增 `m.youtube.com` 的页面识别、来源校验、图片下载和直连恢复支持。
+- 补充移动播放器定位，跟随播放器替换与网页容器全屏；尺寸变化时重新安排轨道。
+- 设置面板适配窄屏，增大触摸操作区域。
+- 新增移动版 YouTube 网站访问权限，更新后浏览器可能要求确认。
+
 
 ### v0.1.15 · 后台直连与来源切换
 
@@ -162,7 +179,7 @@
 
 ## 源码
 
-扩展运行文件位于 `bili-youtube-danmaku/`。版本与权限见 `manifest.json`；后台直连见 `direct.js`，页面采集见 `source.js`、`page-meta.js`；弹幕显示与轨道安排见 `overlay.js`、`layout.js`。
+扩展运行文件位于 `bili-youtube-danmaku/`。版本与权限见 `manifest.json`；YouTube 页面与播放器识别见 `youtube.js`，后台直连见 `direct.js`，页面采集见 `source.js`、`page-meta.js`；弹幕显示与轨道安排见 `overlay.js`、`layout.js`。
 
 ## 反馈
 

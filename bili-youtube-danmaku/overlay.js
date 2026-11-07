@@ -5,6 +5,14 @@
   const layout=new DanmakuLayout();
   const emojiAssets=new Map();
   const emojiPending=new Map();
+  let positionedPlayer=null,positionBefore='',positionPriority='',lastWidth=0,lastHeight=0;
+  function releasePosition(){
+    if(positionedPlayer?.style.position==='relative'){
+      if(positionBefore)positionedPlayer.style.setProperty('position',positionBefore,positionPriority);
+      else positionedPlayer.style.removeProperty('position');
+    }
+    positionedPlayer=null;
+  }
   async function prepareEmoji(items){
     const requested=[...new Set(items.flatMap(item=>Object.values(DanmakuEmoji.cleanMap(item.emojis))))].slice(0,16);
     const urls=requested.filter(url=>!emojiAssets.has(url) && !emojiPending.has(url));
@@ -54,19 +62,24 @@
     if(area==='session' && Object.keys(changes).some(k=>k.startsWith('binding:'))) clear();
   });
   function clear(){queue=[]; layout.clear(); layer?.replaceChildren();}
-  life.onStop(()=>{clear();host?.remove();emojiAssets.clear();});
+  life.onStop(()=>{clear();host?.remove();releasePosition();emojiAssets.clear();});
   function mount(){
     if(lastUrl!==location.href){clear();lastUrl=location.href;}
-    const player=document.querySelector('#movie_player');
-    if(!player || !player.querySelector('video')) return false;
+    const player=DanmakuYouTube.player(document);
+    if(!player){clear();host?.remove();host=null;releasePosition();return false;}
     if(!host || host.parentElement!==player){
-      host?.remove(); host=document.createElement('div');
+      host?.remove();releasePosition();host=document.createElement('div');
+      if(getComputedStyle(player).position==='static'){
+        positionedPlayer=player;positionBefore=player.style.getPropertyValue('position');positionPriority=player.style.getPropertyPriority('position');player.style.position='relative';
+      }
       host.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:60;overflow:hidden;';
       root=host.attachShadow({mode:'closed'});
       const style=document.createElement('style');
       style.textContent='.layer{position:absolute;inset:0;overflow:hidden;pointer-events:none}.msg{position:absolute;left:0;white-space:nowrap;font-family:Arial,"Microsoft YaHei",sans-serif;font-weight:600;color:white;text-shadow:1px 1px 2px #000,-1px -1px 2px #000;line-height:1.3;will-change:transform}';
-      layer=document.createElement('div');layer.className='layer'; root.append(style,layer);player.append(host);clear();
+      layer=document.createElement('div');layer.className='layer'; root.append(style,layer);player.append(host);clear();lastWidth=0;lastHeight=0;
     }
+    if(lastWidth && (Math.abs(host.clientWidth-lastWidth)>1 || Math.abs(host.clientHeight-lastHeight)>1))clear();
+    lastWidth=host.clientWidth;lastHeight=host.clientHeight;
     return host.clientWidth>0 && host.clientHeight>0;
   }
   chrome.runtime.onMessage.addListener((m,s,reply)=>{

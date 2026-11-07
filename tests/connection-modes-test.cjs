@@ -4,7 +4,7 @@ const turn=()=>new Promise(setImmediate);
 async function background(){
  let listener,removed,updated,alarm;const session={},local={},sent=[],connections=[],timers=new Map();let serial=0;
  const store=data=>({get:async key=>key===null?{...data}:Object.fromEntries((Array.isArray(key)?key:[key]).map(k=>[k,data[k]])),set:async obj=>Object.assign(data,obj),remove:async key=>{for(const k of Array.isArray(key)?key:[key])delete data[k];}});
- const tabs={1:{id:1,url:'https://www.youtube.com/watch?v=a'},2:{id:2,url:'https://live.bilibili.com/123'}};
+ const tabs={1:{id:1,url:'https://m.youtube.com/watch?v=a'},2:{id:2,url:'https://live.bilibili.com/123'}};
  const chrome={storage:{session:store(session),local:store(local)},runtime:{onMessage:{addListener:f=>listener=f}},tabs:{get:async id=>tabs[id],sendMessage:async(id,m)=>sent.push({id,m}),onRemoved:{addListener:f=>removed=f},onUpdated:{addListener:f=>updated=f}},alarms:{create(){},onAlarm:{addListener:f=>alarm=f}}};
  const ctx=vm.createContext({chrome,URL,Date,console,setTimeout:f=>{timers.set(++serial,f);return serial},clearTimeout:id=>timers.delete(id)});
  ctx.importScripts=f=>vm.runInContext(fs.readFileSync(path.join(base,f),'utf8'),ctx);
@@ -23,6 +23,7 @@ async function background(){
  assert.equal((await call({type:'bind-direct',target:1,room:'456'},{tab:tabs[2]})).ok,false);
  await call({type:'unbind',target:1});assert.equal(connections[1].stopped,true);assert.equal(session['binding:1'],undefined);
  session['binding:1']={mode:'direct',room:'999'};alarm({name:'direct-recovery'});await turn();await turn();assert.equal(connections.at(-1).room,'999','alarm restores persisted session binding');
+ updated(1,{url:'https://www.youtube.com/watch?v=a'});await turn();assert.equal(connections.at(-1).stopped,undefined,'mobile/desktop site switch preserves connection');
  updated(1,{url:'https://example.com'});await turn();assert.equal(connections.at(-1).stopped,true);assert.equal(session['binding:1'],undefined);
  await call({type:'bind-direct',target:1,room:'123'});await removed(1);assert.equal(connections.at(-1).stopped,true);
  console.log('PASS: direct/tab switching, stale-source isolation, unbind, target removal/navigation and alarm recovery');

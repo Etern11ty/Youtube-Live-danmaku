@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><title>弹幕桥·bilibili直播弹幕转接youtube</title><link rel="stylesheet" href="popup.css"></head>
-<body><header><span>弹幕桥·bilibili直播弹幕转接youtube</span><small>B站 → YouTube · 0.1.15</small></header>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>弹幕桥·bilibili直播弹幕转接youtube</title><link rel="stylesheet" href="popup.css"></head>
+<body><header><span>弹幕桥·bilibili直播弹幕转接youtube</span><small>B站 → YouTube · 0.1.16</small></header>
 <p class="hint">后台直连无需打开 B 站页面，也可保留标签页作为弹幕来源。</p>
 <label>YouTube 页面<select id="target"></select></label>
 <label>连接方式<select id="mode"><option value="direct">后台直连</option><option value="tab">绑定标签页</option></select></label>
@@ -16,4 +16,4 @@
 <label class="range-row"><span>显示区域</span><input id="area" type="range" min="20" max="100"><output id="areaValue"></output></label>
 <label class="toggle"><span>显示发送者昵称</span><input id="showUser" type="checkbox"></label>
 <button id="demo" class="secondary wide">发送测试弹幕</button><p class="hint">赛事直连请填写所选主播的实际房间号。直连失败可切换为绑定标签页，并保持 B 站聊天区正常加载。弹幕仅在本机转发。</p>
-<script src="popup.js"></script></body></html>
+<script src="youtube.js"></script><script src="popup.js"></script></body></html>

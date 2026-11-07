@@ -8,11 +8,13 @@ const base=require('node:path').resolve(__dirname,'../bili-youtube-danmaku')+'/'
   const ctx=vm.createContext({URL,Response,AbortSignal,btoa,Uint8Array,caches:{open:async()=>cache},fetch:async url=>{downloads++;active++;peak=Math.max(peak,active);await new Promise(r=>setTimeout(r,5));active--;return new Response(url.includes('oversized')?new Uint8Array(524289):url.includes('large-emote')?new Uint8Array(300000):new Uint8Array([137,80,78,71]),{headers:{'content-type':'image/png'}});},chrome:{runtime:{onMessage:{addListener:f=>listener=f}},tabs:{onRemoved:{addListener(){}}}}});
   ctx.importScripts=file=>vm.runInContext(fs.readFileSync(base+file,'utf8'),ctx);
   vm.runInContext(fs.readFileSync(base+'background.js','utf8'),ctx);
-  return urls=>new Promise(resolve=>listener({type:'emoji-assets',urls},{tab:{url:'https://www.youtube.com/watch?v=1'}},resolve));
+  return (urls,url='https://www.youtube.com/watch?v=1')=>new Promise(resolve=>listener({type:'emoji-assets',urls},{tab:{url}},resolve));
  }
  const url='https://i0.hdslb.com/cache-test.png',first=serviceWorker();
  assert.ok((await first([url])).assets[url]);assert.equal(downloads,1);
  assert.ok((await serviceWorker()([url])).assets[url]);assert.equal(downloads,1,'worker restart must use persistent cached bytes');
+ assert.ok((await first([url],'https://m.youtube.com/watch?v=1')).assets[url]);assert.equal(downloads,1,'mobile page reuses the image cache');
+ assert.equal((await first([url],'https://m.youtube.com.evil.test/')).ok,false);
  await Promise.all(Array.from({length:9},(_,i)=>first(['https://i0.hdslb.com/concurrent-'+i+'.png'])));
  assert.ok(peak<=4,'all requests must share a four-download concurrency limit');
  assert.equal(downloads,10);
